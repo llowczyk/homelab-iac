@@ -1,0 +1,25 @@
+#!/bin/sh
+HOSTNAME_UPPER=$(hostname | tr '[:lower:]' '[:upper:]')
+
+if command -v figlet >/dev/null 2>&1 && [ -f /usr/share/figlet/ANSI-Shadow.flf ]; then
+    figlet -f /usr/share/figlet/ANSI-Shadow.flf "$HOSTNAME_UPPER"
+elif command -v figlet >/dev/null 2>&1; then
+    figlet "$HOSTNAME_UPPER"
+else
+    echo "== $HOSTNAME_UPPER =="
+fi
+
+IP_ADDR=$(hostname -I 2>/dev/null | awk '{print $1}')
+UPTIME_STR=$(uptime -p 2>/dev/null | sed 's/^up //')
+MEM_INFO=$(free -h | awk '/^Mem:/ {print $3 " / " $2}')
+DISK_INFO=$(df -h / | awk 'NR==2 {print $3 " / " $2 " (" $5 " used)"}')
+LOAD_AVG=$(cut -d' ' -f1-3 /proc/loadavg)
+
+echo "  Managed by: homelab-iac (Terraform + Ansible)"
+echo ""
+echo "  IP Address : $IP_ADDR"
+echo "  Uptime     : $UPTIME_STR"
+echo "  Memory     : $MEM_INFO"
+echo "  Disk (/)   : $DISK_INFO"
+echo "  Load Avg   : $LOAD_AVG"
+echo ""

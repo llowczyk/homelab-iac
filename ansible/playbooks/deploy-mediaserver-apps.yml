@@ -1,0 +1,22 @@
+---
+- name: deploy mediaserver app stack (arr suite, jellyfin, jellyseerr)
+  hosts: mediaserver
+  become: true
+
+  tasks:
+    - name: create mediaserver stack directory
+      file:
+        path: /opt/mediaserver
+        state: directory
+        mode: "0755"
+
+    - name: deploy mediaserver compose file
+      template:
+        src: templates/mediaserver-compose.yml.j2
+        dest: /opt/mediaserver/docker-compose.yml
+        mode: "0644"
+
+    - name: start mediaserver stack
+      community.docker.docker_compose_v2:
+        project_src: /opt/mediaserver
+        state: present

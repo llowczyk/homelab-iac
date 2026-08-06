@@ -1,0 +1,116 @@
+name: ansible drift check
+on:
+  schedule:
+    - cron: '0 6,18 * * *'
+  workflow_dispatch:
+jobs:
+  drift-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: install ansible
+        run: |
+          apt-get update -qq
+          apt-get remove -y -qq ansible ansible-core 2>/dev/null || true
+          apt-get install -y -qq python3-pip openssh-client
+          pip install --break-system-packages --upgrade ansible
+          which -a ansible
+          which -a ansible-playbook
+          ansible --version
+          ansible-galaxy collection install community.docker ansible.posix
+
+      - name: set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ANSIBLE_SSH_KEY }}" > ~/.ssh/ansible_key
+          chmod 600 ~/.ssh/ansible_key
+          ssh-keyscan -H 192.168.1.101 192.168.1.102 192.168.1.103 192.168.1.104 192.168.1.107 192.168.1.108 192.168.1.10 >> ~/.ssh/known_hosts 2>/dev/null
+
+          mkdir -p ansible/playbooks/templates/zabbix-ssh-keys
+          echo "${{ secrets.ZABBIX_TEMP_CHECK_KEY }}" > ansible/playbooks/templates/zabbix-ssh-keys/id_zabbix
+          chmod 600 ansible/playbooks/templates/zabbix-ssh-keys/id_zabbix
+
+      - name: check drift — golden image
+        working-directory: ansible
+        run: |
+          ansible-playbook -i inventory/prod.ini playbooks/initial-setup-prod.yml --check -l 'prod:!monitor:!tools' 2>&1 | tee /tmp/drift1.log
+          tail -1 /tmp/drift1.log | grep -q "changed=0" || echo "DRIFT=1" >> "$GITHUB_ENV"
+
+      - name: check drift — golden image (tools, no portainer agent)
+        working-directory: ansible
+        run: |
+          ansible-playbook -i inventory/prod.ini playbooks/initial-setup-prod.yml --check --skip-tags portainer_agent -l tools 2>&1 | tee /tmp/drift1b.log
+          tail -1 /tmp/drift1b.log | grep -q "changed=0" || echo "DRIFT=1" >> "$GITHUB_ENV"
+
+      - name: check drift — nas
+        working-directory: ansible
+        run: |
+          ansible-playbook -i inventory/prod.ini playbooks/deploy-nas.yml --check 2>&1 | tee /tmp/drift.log
+          tail -1 /tmp/drift.log | grep -q "changed=0" || echo "DRIFT=1" >> "$GITHUB_ENV"
+
+      - name: check drift — monitoring
+        working-directory: ansible
+        run: |
+          ansible-playbook -i inventory/prod.ini playbooks/deploy-monitoring.yml --check \
+            -e "zabbix_postgres_user=${{ secrets.ZABBIX_POSTGRES_USER }}" \
+            -e "zabbix_postgres_password=${{ secrets.ZABBIX_POSTGRES_PASSWORD }}" \
+            -e "zabbix_postgres_db=${{ secrets.ZABBIX_POSTGRES_DB }}" \
+            -e "zabbix_php_tz=${{ secrets.ZABBIX_PHP_TZ }}" \
+            -e "zabbix_agent_hostname=${{ secrets.ZABBIX_AGENT_HOSTNAME }}" \
+            2>&1 | tee /tmp/drift.log
+          tail -1 /tmp/drift.log | grep -q "changed=0" || echo "DRIFT=1" >> "$GITHUB_ENV"
+
+      - name: check drift — torrentbox apps
+        working-directory: ansible
+        run: |
+          ansible-playbook -i inventory/prod.ini playbooks/deploy-torrentbox-apps.yml --check \
+            -e "wg_private_key=${{ secrets.WG_PRIVATE_KEY }}" \
+            -e "wg_addresses=${{ secrets.WG_ADDRESSES }}" \
+            -e "server_countries=${{ secrets.SERVER_COUNTRIES }}" \
+            -e "transmission_user=${{ secrets.TRANSMISSION_USER }}" \
+            -e "transmission_pass=${{ secrets.TRANSMISSION_PASS }}" \
+            -e "check_interval=${{ secrets.CHECK_INTERVAL }}" \
+            -e "max_failures=${{ secrets.MAX_FAILURES }}" \
+            -e "target_container=${{ secrets.TARGET_CONTAINER }}" \
+            2>&1 | tee /tmp/drift.log
+          tail -1 /tmp/drift.log | grep -q "changed=0" || echo "DRIFT=1" >> "$GITHUB_ENV"
+
+      - name: check drift — mediaserver apps
+        working-directory: ansible
+        run: |
+          ansible-playbook -i inventory/prod.ini playbooks/deploy-mediaserver-apps.yml --check 2>&1 | tee /tmp/drift.log
+          tail -1 /tmp/drift.log | grep -q "changed=0" || echo "DRIFT=1" >> "$GITHUB_ENV"
+
+      - name: check drift — proxy apps
+        working-directory: ansible
+        run: |
+          ansible-playbook -i inventory/prod.ini playbooks/deploy-proxy-apps.yml --check 2>&1 | tee /tmp/drift.log
+          tail -1 /tmp/drift.log | grep -q "changed=0" || echo "DRIFT=1" >> "$GITHUB_ENV"
+
+      - name: check drift — tools apps
+        working-directory: ansible
+        run: |
+          ansible-playbook -i inventory/prod.ini playbooks/deploy-tools-apps.yml --check \
+            -e "grafana_admin_user=${{ secrets.GRAFANA_ADMIN_USER }}" \
+            -e "grafana_admin_password=${{ secrets.GRAFANA_ADMIN_PASSWORD }}" \
+            -e "grafana_root_url=${{ secrets.GRAFANA_ROOT_URL }}" \
+            -e "wikijs_postgres_user=${{ secrets.WIKIJS_POSTGRES_USER }}" \
+            -e "wikijs_postgres_password=${{ secrets.WIKIJS_POSTGRES_PASSWORD }}" \
+            -e "wikijs_postgres_db=${{ secrets.WIKIJS_POSTGRES_DB }}" \
+            2>&1 | tee /tmp/drift.log
+          tail -1 /tmp/drift.log | grep -q "changed=0" || echo "DRIFT=1" >> "$GITHUB_ENV"
+
+      - name: check drift — rpi services
+        working-directory: ansible
+        run: |
+          ansible-playbook -i inventory/prod.ini playbooks/deploy-rpi-services.yml --check \
+            2>&1 | tee /tmp/drift.log
+          tail -1 /tmp/drift.log | grep -q "changed=0" || echo "DRIFT=1" >> "$GITHUB_ENV"
+
+      - name: fail if drift found
+        if: env.DRIFT == '1'
+        run: |
+          echo "::error::Ansible drift detected in one or more playbooks — check the step logs above"
+          exit 1

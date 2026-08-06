@@ -1,0 +1,28 @@
+services:
+  proxmox-qdevice:
+    image: carolouellet/proxmox-qdevice:master
+    platform: linux/arm64
+    container_name: proxmox-qdevice
+    hostname: ${HOSTNAME}
+    restart: unless-stopped
+    environment:
+      - NEW_ROOT_PASSWORD=${ROOT_PASSWORD}
+    volumes:
+      - ${COROSYNC_DATA}:/etc/corosync
+      - ${SSH_DATA}/etc/ssh:/etc/ssh
+    networks:
+      qdevice_net:
+        ipv4_address: ${CONTAINER_IP}
+    command: >
+      sh -c "mkdir -p /run/sshd && supervisord"
+networks:
+  qdevice_net:
+    driver: macvlan
+    driver_opts:
+      parent: ${PARENT_INTERFACE}
+    ipam:
+      config:
+        - subnet: ${SUBNET}
+          ip_range: ${IP_RANGE}
+          gateway: ${GATEWAY}
+

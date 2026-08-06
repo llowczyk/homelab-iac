@@ -1,0 +1,114 @@
+---
+title: "homelab"
+subtitle: "control center"
+header: true
+footer: false
+columns: "auto"
+theme: default
+
+colors:
+  dark:
+    highlight-primary: "#4285f4"
+    highlight-secondary: "#8ab4f8"
+    highlight-hover: "#aecbfa"
+    background: "#0f0f0f"
+    card-background: "#1a1a1a"
+    text: "#eaeaea"
+    text-header: "#ffffff"
+    text-title: "#fafafa"
+    text-subtitle: "#9a9a9a"
+    card-shadow: rgba(0, 0, 0, 0.5)
+    link: "#8ab4f8"
+    link-hover: "#ffdd57"
+
+defaults:
+  layout: list
+  colorTheme: dark
+
+services:
+  - name: "core infra"
+    icon: "fas fa-server"
+    items:
+      - name: "pve01"
+        url: "https://192.168.1.100:8006"
+        target: "_blank"
+      - name: "pve02"
+        url: "https://192.168.1.110:8006"
+        target: "_blank"
+      - name: "portainer"
+        url: "https://192.168.1.108:9443"
+        target: "_blank"
+      - name: "proxmox backup server"
+        url: "https://192.168.1.109:8007"
+        target: "_blank"
+      - name: "gitea"
+        url: "http://192.168.1.105:3000"
+        target: "_blank"
+
+  - name: "network"
+    icon: "fas fa-network-wired"
+    items:
+      - name: "isp idu"
+        url: "https://192.168.1.1/index.html"
+        target: "_blank"
+      - name: "switch"
+        url: "http://192.168.1.2/"
+        target: "_blank"
+      - name: "adguard home"
+        url: "http://192.168.1.10:3000"
+        target: "_blank"
+      - name: "npm"
+        url: "http://192.168.1.107:81"
+        target: "_blank"
+
+  - name: "monitoring"
+    icon: "fas fa-chart-line"
+    items:
+      - name: "zabbix"
+        url: "http://192.168.1.102:8080"
+        target: "_blank"
+      - name: "uptime kuma"
+        url: "http://192.168.1.102:3001"
+        target: "_blank"
+      - name: "grafana"
+        url: "http://192.168.1.108:3000"
+        target: "_blank"
+
+  - name: "media"
+    icon: "fas fa-photo-video"
+    items:
+      - name: "jellyfin"
+        url: "http://192.168.1.103:8096"
+        target: "_blank"
+      - name: "jellyseerr"
+        url: "http://192.168.1.103:5055"
+        target: "_blank"
+      - name: "sonarr"
+        url: "http://192.168.1.103:8989"
+        target: "_blank"
+      - name: "radarr"
+        url: "http://192.168.1.103:7878"
+        target: "_blank"
+      - name: "prowlarr"
+        url: "http://192.168.1.103:9696"
+        target: "_blank"
+      - name: "bazarr"
+        url: "http://192.168.1.103:6767"
+        target: "_blank"
+
+  - name: "downloads"
+    icon: "fas fa-download"
+    items:
+      - name: "transmission"
+        url: "http://192.168.1.104:9091"
+        target: "_blank"
+
+  - name: "utility"
+    icon: "fas fa-toolbox"
+    items:
+      - name: "wiki.js"
+        url: "http://192.168.1.108:8083"
+        target: "_blank"
+      - name: "printer"
+        url: "http://192.168.1.58"
+        target: "_blank"

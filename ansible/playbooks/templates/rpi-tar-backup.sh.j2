@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+DATE=$(date +%Y-%m-%d)
+DEST=/mnt/nas/backups/rpi/tar
+mkdir -p "$DEST"
+
+tar czf "$DEST/adguard-$DATE.tar.gz" -C /home/pi/docker-files/adguard work conf
+
+find "$DEST" -name "*.tar.gz" -mtime +14 -delete

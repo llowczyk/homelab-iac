@@ -1,0 +1,13 @@
+services:
+  promtail:
+    image: grafana/promtail@sha256:6cfa64ec432b24a912d640e2edb940eeae2666f61861a66c121d763dd7241381
+    container_name: promtail
+    group_add:
+      - "988"
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./promtail-config.yml:/etc/promtail/config.yml
+    network_mode: host
+    command: -config.file=/etc/promtail/config.yml
+    restart: unless-stopped

@@ -1,0 +1,51 @@
+services:
+  gluetun:
+    image: qmcgaw/gluetun@sha256:b0ee2135e6ba52ad3f102aae9663707cd1c9531485117067a380d3b2b6dd991d
+    container_name: gluetun
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    ports:
+      - 9091:9091
+      - 51413:51413
+      - 51413:51413/udp
+    environment:
+      - VPN_SERVICE_PROVIDER=surfshark
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY={{ wg_private_key }}
+      - WIREGUARD_ADDRESSES={{ wg_addresses }}
+      - SERVER_COUNTRIES={{ server_countries }}
+    volumes:
+      - gluetun_data:/gluetun
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/gluetun-entrypoint", "healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+  transmission:
+    image: lscr.io/linuxserver/transmission@sha256:0913501f5d05c019f5e3555a3299df1d8de420fdf882c92a8857787f9fbf999d
+    container_name: transmission
+    network_mode: "service:gluetun"
+    depends_on:
+      gluetun:
+        condition: service_healthy
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Warsaw
+      - USER={{ transmission_user }}
+      - PASS={{ transmission_pass }}
+    volumes:
+      - transmission_config:/config
+      - /mnt/nas/downloads:/downloads
+      - /mnt/nas/downloads/watch:/watch
+    restart: unless-stopped
+volumes:
+  gluetun_data:
+  transmission_config:
+networks:
+  default:
+    name: torrentbox

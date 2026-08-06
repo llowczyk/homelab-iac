@@ -1,0 +1,20 @@
+services:
+  zabbix-agent:
+    image: zabbix/zabbix-agent2@sha256:fc5c185bdb55177c8b0c01a8a4906d19b85eafd37fab27ee4f743f64d6e8789d
+    container_name: zabbix-agent
+    privileged: true
+    group_add:
+      - "985"
+    environment:
+      ZBX_SERVER_HOST: 192.168.1.102
+      ZBX_HOSTNAME: homelab-rpi
+      ZBX_USERPARAMETER: "cpu.temp,cat /rootfs/sys/class/thermal/thermal_zone0/temp"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/rootfs:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - ./config:/etc/zabbix/zabbix_agentd.d:ro
+    ports:
+      - "10050:10050"
+    restart: unless-stopped

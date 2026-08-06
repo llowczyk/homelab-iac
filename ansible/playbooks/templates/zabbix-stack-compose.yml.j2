@@ -1,0 +1,80 @@
+version: '3.9'
+services:
+  zabbix-db:
+    image: postgres@sha256:74e110c41804365e3915fcc09d5e7a1eff50161aaa94d5da0e58e0cd75ae509c
+    container_name: zabbix-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - zabbix-db-data:/var/lib/postgresql/data
+    networks:
+      - zabbix-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+  zabbix-server:
+    image: zabbix/zabbix-server-pgsql@sha256:8c684fb3c00d1fbdc406e399625f90ef87c1a337b57f5bb8e2ba1bbb04c96b39
+    container_name: zabbix-server
+    environment:
+      DB_SERVER_HOST: zabbix-db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    depends_on:
+      zabbix-db:
+        condition: service_healthy
+    volumes:
+      - ./ssh_keys:/var/lib/zabbix/ssh_keys
+    ports:
+      - "10051:10051"
+    networks:
+      - zabbix-net
+    restart: unless-stopped
+  zabbix-web:
+    image: zabbix/zabbix-web-nginx-pgsql@sha256:ee264dbdfa4cb5ffece9b1ee7a30fc64d3ed71ba6923c488908368991b7f455c
+    container_name: zabbix-web
+    environment:
+      DB_SERVER_HOST: zabbix-db
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      ZBX_SERVER_HOST: zabbix-server
+      PHP_TZ: ${PHP_TZ}
+    depends_on:
+      - zabbix-server
+    ports:
+      - "8080:8080"
+    networks:
+      - zabbix-net
+    restart: unless-stopped
+  zabbix-agent:
+    image: zabbix/zabbix-agent2@sha256:4cbb3686feede0598ccca0db5af936c0371c96d296875cf70e29640cd560393c
+    container_name: zabbix-agent
+    privileged: true
+    group_add:
+      - "988"
+    environment:
+      ZBX_SERVER_HOST: zabbix-server
+      ZBX_HOSTNAME: ${AGENT_HOSTNAME}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/rootfs:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    ports:
+      - "10050:10050"
+    networks:
+      - zabbix-net
+    restart: unless-stopped
+volumes:
+  zabbix-db-data:
+networks:
+  zabbix-net:

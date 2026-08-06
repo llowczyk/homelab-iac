@@ -1,0 +1,43 @@
+---
+- name: deploy nas (nfs export + samba)
+  hosts: nas
+  become: true
+
+  tasks:
+    - name: install nfs server
+      apt:
+        name: nfs-kernel-server
+        state: present
+        update_cache: true
+
+    - name: configure NFS export
+      lineinfile:
+        path: /etc/exports
+        line: "/mnt/nas 192.168.1.0/24(rw,sync,no_subtree_check,no_root_squash)"
+        create: true
+
+    - name: apply nfs exports
+      command: exportfs -ra
+
+    - name: ensure nfs server is enabled and running
+      systemd:
+        name: nfs-kernel-server
+        enabled: true
+        state: started
+
+    - name: create samba directory
+      file:
+        path: /opt/samba
+        state: directory
+        mode: "0755"
+
+    - name: deploy samba compose file
+      template:
+        src: templates/nas-samba-compose.yml.j2
+        dest: /opt/samba/docker-compose.yml
+        mode: "0644"
+
+    - name: start samba
+      community.docker.docker_compose_v2:
+        project_src: /opt/samba
+        state: present

@@ -1,0 +1,21 @@
+services:
+  zabbix-agent:
+    image: zabbix/zabbix-agent2:alpine-7.0-latest
+    container_name: zabbix-agent
+    privileged: true
+    group_add:
+      - "988"
+    environment:
+      ZBX_SERVER_HOST: zabbix_server_host
+      ZBX_HOSTNAME: zabbix_hostname
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/rootfs:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    ports:
+      - "10050:10050"
+    restart: unless-stopped
+networks:
+  infra:
+    external: true

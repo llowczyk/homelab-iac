@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+DATE=$(date +%Y-%m-%d)
+DEST=/mnt/nas/backups/rpi/image
+mkdir -p "$DEST"
+
+sync
+dd if=/dev/mmcblk0 bs=4M conv=sync,noerror status=progress | gzip > "$DEST/sdcard-$DATE.img.gz"
+
+ls -t "$DEST"/sdcard-*.img.gz | tail -n +4 | xargs -r rm --

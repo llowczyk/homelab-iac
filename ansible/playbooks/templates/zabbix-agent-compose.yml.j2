@@ -1,0 +1,18 @@
+services:
+  zabbix-agent:
+    image: zabbix/zabbix-agent2@sha256:4cbb3686feede0598ccca0db5af936c0371c96d296875cf70e29640cd560393c
+    container_name: zabbix-agent
+    privileged: true
+    group_add:
+      - "988"
+    environment:
+      ZBX_SERVER_HOST: 192.168.1.102
+      ZBX_HOSTNAME: "{{ inventory_hostname }}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /:/rootfs:ro
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+    ports:
+      - "10050:10050"
+    restart: unless-stopped

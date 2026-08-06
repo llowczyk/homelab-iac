@@ -1,0 +1,52 @@
+services:
+  vpn-healthcheck:
+    image: alpine@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
+    container_name: vpn-healthcheck
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - CHECK_INTERVAL={{ check_interval }}
+      - MAX_FAILURES={{ max_failures }}
+      - TARGET_CONTAINER={{ target_container }}
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        apk add --no-cache docker-cli
+        FAILURES=0
+        echo "VPN Health Checker started"
+        echo "Target: $${TARGET_CONTAINER}"
+        echo "Check interval: $${CHECK_INTERVAL}s, Max failures: $${MAX_FAILURES}"
+        while true; do
+          sleep $${CHECK_INTERVAL}
+          CONTAINER_STATUS=$$(docker inspect -f '{{ '{{' }}.State.Running{{ '}}' }}' $${TARGET_CONTAINER} 2>/dev/null)
+          if [ "$$CONTAINER_STATUS" != "true" ]; then
+            echo "$$(date): $${TARGET_CONTAINER} not running, attempting restart..."
+            docker restart $${TARGET_CONTAINER}
+            FAILURES=0
+            sleep 30
+            continue
+          fi
+          if docker exec $${TARGET_CONTAINER} wget -q --timeout=10 -O /dev/null https://am.i.mullvad.net/connected 2>/dev/null; then
+            if [ $$FAILURES -gt 0 ]; then
+              echo "$$(date): VPN connection restored"
+            fi
+            FAILURES=0
+          elif docker exec $${TARGET_CONTAINER} wget -q --timeout=10 -O /dev/null https://ipinfo.io/ip 2>/dev/null; then
+            if [ $$FAILURES -gt 0 ]; then
+              echo "$$(date): VPN connection restored"
+            fi
+            FAILURES=0
+          else
+            FAILURES=$$((FAILURES + 1))
+            echo "$$(date): VPN check failed ($$FAILURES/$${MAX_FAILURES})"
+            if [ $$FAILURES -ge $${MAX_FAILURES} ]; then
+              echo "$$(date): Max failures reached, restarting $${TARGET_CONTAINER}..."
+              docker restart $${TARGET_CONTAINER}
+              FAILURES=0
+              echo "$$(date): Waiting 60s for VPN to reconnect..."
+              sleep 60
+            fi
+          fi
+        done
+    restart: unless-stopped

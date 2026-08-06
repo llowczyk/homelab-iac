@@ -1,0 +1,13 @@
+services:
+  samba:
+    image: dperson/samba
+    container_name: samba
+    restart: unless-stopped
+    ports:
+      - "139:139"
+      - "445:445"
+    volumes:
+      - /mnt/nas:/mount/nas
+    environment:
+      - TZ=Europe/Warsaw
+    command: -s "NAS;/mount/nas;yes;no;yes"

@@ -1,0 +1,39 @@
+---
+- name: deploy torrentbox app stacks (VPN + transmission, healthcheck)
+  hosts: torrentbox
+  become: true
+
+  tasks:
+    - name: create torrentbox stack directory
+      file:
+        path: /opt/torrentbox
+        state: directory
+        mode: "0755"
+
+    - name: deploy torrentbox compose file
+      template:
+        src: templates/torrentbox-compose.yml.j2
+        dest: /opt/torrentbox/docker-compose.yml
+        mode: "0644"
+
+    - name: start torrentbox stack
+      community.docker.docker_compose_v2:
+        project_src: /opt/torrentbox
+        state: present
+
+    - name: create vpn-healthcheck stack directory
+      file:
+        path: /opt/vpn-healthcheck
+        state: directory
+        mode: "0755"
+
+    - name: deploy vpn-healthcheck compose file
+      template:
+        src: templates/vpn-healthcheck-compose.yml.j2
+        dest: /opt/vpn-healthcheck/docker-compose.yml
+        mode: "0644"
+
+    - name: start vpn-healthcheck stack
+      community.docker.docker_compose_v2:
+        project_src: /opt/vpn-healthcheck
+        state: present

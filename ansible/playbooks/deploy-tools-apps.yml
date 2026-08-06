@@ -1,0 +1,39 @@
+---
+- name: deploy tools VM apps (Portainer, Grafana, Loki)
+  hosts: tools
+  become: true
+
+  tasks:
+    # --- portainer ---
+    - name: create portainer directory
+      file: { path: /opt/portainer, state: directory, mode: "0755" }
+    - name: deploy portainer compose file
+      template: { src: templates/tools-portainer-compose.yml.j2, dest: /opt/portainer/docker-compose.yml, mode: "0644" }
+    - name: start portainer
+      community.docker.docker_compose_v2: { project_src: /opt/portainer, state: present }
+
+    # --- grafana ---
+    - name: create grafana directory
+      file: { path: /opt/grafana, state: directory, mode: "0755" }
+    - name: deploy grafana compose file
+      template: { src: templates/tools-grafana-compose.yml.j2, dest: /opt/grafana/docker-compose.yml, mode: "0644" }
+    - name: start grafana
+      community.docker.docker_compose_v2: { project_src: /opt/grafana, state: present }
+
+    # --- loki ---
+    - name: create loki directory
+      file: { path: /opt/loki, state: directory, mode: "0755" }
+    - name: deploy loki compose file
+      template: { src: templates/tools-loki-compose.yml.j2, dest: /opt/loki/docker-compose.yml, mode: "0644" }
+    - name: deploy loki config
+      template: { src: templates/tools-loki-config.yml.j2, dest: /opt/loki/loki-config.yml, mode: "0644" }
+    - name: start loki
+      community.docker.docker_compose_v2: { project_src: /opt/loki, state: present }
+
+    # --- wikijs ---
+    - name: create wikijs directory
+      file: { path: /opt/wikijs, state: directory, mode: "0755" }
+    - name: deploy wikijs compose file
+      template: { src: templates/tools-wikijs-compose.yml.j2, dest: /opt/wikijs/docker-compose.yml, mode: "0644" }
+    - name: start wikijs
+      community.docker.docker_compose_v2: { project_src: /opt/wikijs, state: present }

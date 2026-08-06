@@ -1,0 +1,19 @@
+---
+- name: check for available OS updates across the fleet
+  hosts: prod:rpi
+  become: true
+
+  tasks:
+    - name: refresh apt cache
+      apt:
+        update_cache: true
+      changed_when: false
+
+    - name: list upgradable packages
+      command: apt list --upgradable
+      register: upgradable
+      changed_when: false
+
+    - name: report upgradable package count
+      debug:
+        msg: "{{ inventory_hostname }}: {{ (upgradable.stdout_lines | length) - 1 }} package(s) upgradable"

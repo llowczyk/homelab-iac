@@ -1,0 +1,33 @@
+services:
+  wikijs:
+    image: ghcr.io/requarks/wiki@sha256:1ad473cff124fa455e7aa43bbf7984c5b111a62a1317c664c4bf7a51343d6c91
+    container_name: wikijs
+    depends_on:
+      - wikijs-db
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: wikijs-db
+      DB_PORT: 5432
+      DB_USER: {{ wikijs_postgres_user }}
+      DB_PASS: {{ wikijs_postgres_password }}
+      DB_NAME: {{ wikijs_postgres_db }}
+    ports:
+      - "8083:3000"
+    networks:
+      - infra
+    restart: unless-stopped
+  wikijs-db:
+    image: postgres@sha256:b3968e348b48f1198cc6de6611d055dbad91cd561b7990c406c3fc28d7095b21
+    container_name: wikijs-db
+    environment:
+      POSTGRES_USER: {{ wikijs_postgres_user }}
+      POSTGRES_PASSWORD: {{ wikijs_postgres_password }}
+      POSTGRES_DB: {{ wikijs_postgres_db }}
+    volumes:
+      - ./wikijs-data:/var/lib/postgresql/data
+    networks:
+      - infra
+    restart: unless-stopped
+networks:
+  infra:
+    external: true

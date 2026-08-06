@@ -1,0 +1,25 @@
+name: os update check
+on:
+  schedule:
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: install ansible
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq python3-pip openssh-client
+          pip install --break-system-packages ansible
+      - name: set up ssh key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ANSIBLE_SSH_KEY }}" > ~/.ssh/ansible_key
+          chmod 600 ~/.ssh/ansible_key
+          ssh-keyscan -H 192.168.1.101 192.168.1.102 192.168.1.103 192.168.1.104 192.168.1.107 192.168.1.108 192.168.1.10 >> ~/.ssh/known_hosts 2>/dev/null
+      - name: run check
+        working-directory: ansible
+        run: ansible-playbook -i inventory/prod.ini playbooks/check-os-updates.yml
