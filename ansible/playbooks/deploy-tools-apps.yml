@@ -1,5 +1,5 @@
 ---
-- name: deploy tools VM apps (Portainer, Grafana, Loki)
+- name: deploy tools VM apps (Portainer, Grafana, Loki, DBGate)
   hosts: tools
   become: true
 
@@ -37,3 +37,11 @@
       template: { src: templates/tools-wikijs-compose.yml.j2, dest: /opt/wikijs/docker-compose.yml, mode: "0644" }
     - name: start wikijs
       community.docker.docker_compose_v2: { project_src: /opt/wikijs, state: present }
+
+    # --- dbgate ---
+    - name: create dbgate directory
+      file: { path: /opt/dbgate, state: directory, mode: "0755" }
+    - name: deploy dbgate compose file
+      template: { src: templates/tools-dbgate-compose.yml.j2, dest: /opt/dbgate/docker-compose.yml, mode: "0644" }
+    - name: start dbgate
+      community.docker.docker_compose_v2: { project_src: /opt/dbgate, state: present }

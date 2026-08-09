@@ -45,6 +45,7 @@ locals {
       - portainer (manager)
       - grafana + loki
       - promtail ships logs here from every vm
+      - dbgate
       - managed via homelab-iac (terraform + ansible)
       - playbook: deploy-tools-apps.yml
     EOT

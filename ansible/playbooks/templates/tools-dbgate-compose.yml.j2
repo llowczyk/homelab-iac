@@ -1,0 +1,18 @@
+services:
+  dbgate:
+    image: dbgate/dbgate@sha256:38f4af9ab85d4aa112acc2e24d3e12c07c38e1e9727022e4387567cd3ec718a1 
+    container_name: dbgate
+    environment:
+      - TZ=Europe/Warsaw
+    volumes:
+      - dbgate_data:/root/.dbgate
+    ports:
+      - "8090:3000"
+    networks:
+      - infra
+    restart: unless-stopped
+volumes:
+  dbgate_data:
+networks:
+  infra:
+    external: true

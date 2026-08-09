@@ -73,7 +73,7 @@ My homelab also runs small Windows Server environment (a domain controller and 2
  | `mediaserver` | Jellyfin, Jellyseerr, *arr stack |
  | `torrentbox` | Gluetun (WireGuard VPN) + Transmission |
  | `proxy` | Nginx Proxy Manager |
- | `tools` | Portainer (gui), Grafana, Loki, Wiki.js |
+ | `tools` | Portainer (gui), Grafana, Loki, Wiki.js, DBGate |
 
 Every one of these VMs is provisioned from a shared **golden image**, a
 cloud-init-enabled Ubuntu template that Terraform clones for each VM. Cloning
