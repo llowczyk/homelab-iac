@@ -3,8 +3,4 @@
 **/*.tfstate.backup
 **/.terraform.lock.hcl
 **/terraform.tfvars
-**/group_vars/monitoring.yml
-**/group_vars/torrentbox.yml
-**/group_vars/rpi.yml
-**/group_vars/tools.yml
 **/templates/zabbix-ssh-keys/id_zabbix
