@@ -56,7 +56,7 @@ services:
       - zabbix-net
     restart: unless-stopped
   zabbix-agent:
-    image: zabbix/zabbix-agent2@sha256:4cbb3686feede0598ccca0db5af936c0371c96d296875cf70e29640cd560393c
+    image: zabbix/zabbix-agent2@sha256:1a6259be4c8da5267cdd25064d995a111e8c803df8b9c4072d10084f685ffab4
     container_name: zabbix-agent
     privileged: true
     group_add:

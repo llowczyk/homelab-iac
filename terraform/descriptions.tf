@@ -59,5 +59,11 @@ locals {
       - managed via homelab-iac (terraform + ansible)
       - playbook: deploy-nas.yml
     EOT
+
+    jumpbox = <<-EOT
+      ## jumpbox
+
+      - tailscale
+    EOT
  }
 }

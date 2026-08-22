@@ -10,6 +10,10 @@ output "mediaserver_ip" {
   value = "192.168.1.103"
 }
 
+output "jumpbox_ip" {
+  value = "192.168.1.106"
+}
+
 output "proxy_ip" {
   value = "192.168.1.107"
 }

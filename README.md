@@ -72,6 +72,7 @@ My homelab also runs small Windows Server environment (a domain controller and 2
  | `monitor` | Zabbix stack (server, db, gui), Uptime Kuma |
  | `mediaserver` | Jellyfin, Jellyseerr, *arr stack |
  | `torrentbox` | Gluetun (WireGuard VPN) + Transmission |
+ | `jumpbox` | Tailscale Subnet Router |
  | `proxy` | Nginx Proxy Manager |
  | `tools` | Portainer (gui), Grafana, Loki, Wiki.js, DBGate |
 
