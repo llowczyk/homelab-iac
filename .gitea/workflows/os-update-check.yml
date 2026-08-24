@@ -14,12 +14,12 @@ jobs:
           apt-get update -qq
           apt-get install -y -qq python3-pip openssh-client
           pip install --break-system-packages ansible
-      - name: set up ssh key
+      - name: set up SSH key and vault password
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.ANSIBLE_SSH_KEY }}" > ~/.ssh/ansible_key
           chmod 600 ~/.ssh/ansible_key
-          ssh-keyscan -H 192.168.1.101 192.168.1.102 192.168.1.103 192.168.1.104 192.168.1.107 192.168.1.108 192.168.1.10 >> ~/.ssh/known_hosts 2>/dev/null
+          ssh-keyscan -H 192.168.1.101 192.168.1.102 192.168.1.103 192.168.1.104 192.168.1.106 192.168.1.107 192.168.1.108 192.168.1.10 >> ~/.ssh/known_hosts 2>      
       - name: run check
         working-directory: ansible
         run: ansible-playbook -i inventory/prod.ini playbooks/check-os-updates.yml
