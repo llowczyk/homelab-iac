@@ -1,14 +1,13 @@
 resource "proxmox_virtual_environment_vm" "monitoring" {
   name        = "monitor"
   node_name   = "pve02"
-  migrate     = true
-  vm_id       = 102
+  vm_id       = 104
   tags        = local.vm_tags["monitoring"]
   machine     = var.machine_type
   description = local.vm_descriptions["monitoring"]
 
   clone {
-    vm_id = 900
+    vm_id = 901
     full  = true
   }
 
@@ -30,13 +29,14 @@ resource "proxmox_virtual_environment_vm" "monitoring" {
 
   network_device {
     bridge = var.network_bridge
+    vlan_id = 10
   }
 
   initialization {
     ip_config {
       ipv4 {
-        address = "192.168.1.102/24"
-        gateway = var.network_gateway
+        address = "192.168.10.104/24"
+        gateway = var.network_gateway["10"]
       }
     }
 
@@ -57,5 +57,9 @@ resource "proxmox_virtual_environment_vm" "monitoring" {
 
   agent {
     enabled = var.agent_enabled
+  }
+
+  lifecycle {
+    ignore_changes = [initialization[0].user_account[0].password]
   }
 }

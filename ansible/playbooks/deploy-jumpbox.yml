@@ -16,11 +16,13 @@
       get_url:
         url: https://pkgs.tailscale.com/stable/ubuntu/noble.noarmor.gpg
         dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
+      changed_when: false
 
     - name: add tailscale apt repo
       get_url:
         url: https://pkgs.tailscale.com/stable/ubuntu/noble.tailscale-keyring.list
         dest: /etc/apt/sources.list.d/tailscale.list
+      changed_when: false
 
     - name: install tailscale
       apt:
@@ -33,16 +35,25 @@
         enabled: true
         state: started
 
+    - name: check current tailscale status
+      command: tailscale status --json
+      register: ts_status
+      changed_when: false
+      failed_when: false
+
     - name: bring up tailscale, advertise subnet
       command: >
         tailscale up
         --authkey={{ tailscale_authkey }}
-        --advertise-routes=192.168.1.0/24
+        --advertise-routes=192.168.10.0/24,192.168.20.0/24,192.168.30.0/24
         --accept-dns=false
+      when: >
+        ts_status.rc != 0 or 
+        '"BackendState": "Running"' not in ts_status.stdout
       register: ts_result
-      changed_when: "'Success' in ts_result.stdout or ts_result.rc == 0"
 
     - name: restart tailscaled to ensure forwarding rules take priority over docker
       systemd:
         name: tailscaled
         state: restarted
+      when: ts_result is changed

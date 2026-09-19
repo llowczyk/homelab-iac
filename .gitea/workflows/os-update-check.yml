@@ -19,7 +19,9 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.ANSIBLE_SSH_KEY }}" > ~/.ssh/ansible_key
           chmod 600 ~/.ssh/ansible_key
-          ssh-keyscan -H 192.168.1.101 192.168.1.102 192.168.1.103 192.168.1.104 192.168.1.106 192.168.1.107 192.168.1.108 192.168.1.10 >> ~/.ssh/known_hosts 2>      
+          ssh-keyscan -H 192.168.20.102 192.168.10.104 192.168.20.107 192.168.30.106 192.168.10.108 192.168.10.103 192.168.10.105 192.168.10.10 >> ~/.ssh/known_hosts 2>/dev/null
+          echo "${{ secrets.ANSIBLE_VAULT_PASSWORD }}" > ~/.vault_pass
+          chmod 600 ~/.vault_pass
       - name: run check
         working-directory: ansible
         run: ansible-playbook -i inventory/prod.ini playbooks/check-os-updates.yml

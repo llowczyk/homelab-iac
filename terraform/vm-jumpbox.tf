@@ -1,7 +1,7 @@
 resource "proxmox_virtual_environment_vm" "jumpbox" {
   name        = "jumpbox"
   node_name   = "pve01"
-  vm_id       = 106
+  vm_id       = 108
   tags        = local.vm_tags["jumpbox"]
   machine     = var.machine_type
   description = local.vm_descriptions["jumpbox"]
@@ -29,13 +29,14 @@ resource "proxmox_virtual_environment_vm" "jumpbox" {
 
   network_device {
     bridge = var.network_bridge
+    vlan_id = 10
   }
 
   initialization {
     ip_config {
       ipv4 {
-        address = "192.168.1.106/24"
-        gateway = var.network_gateway
+        address = "192.168.10.108/24"
+        gateway = var.network_gateway["10"]
       }
     }
 
@@ -56,5 +57,9 @@ resource "proxmox_virtual_environment_vm" "jumpbox" {
 
   agent {
     enabled = var.agent_enabled
+  }
+
+  lifecycle {
+    ignore_changes = [initialization[0].user_account[0].password]
   }
 }

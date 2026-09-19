@@ -6,7 +6,7 @@ services:
     group_add:
       - "988"
     environment:
-      ZBX_SERVER_HOST: 192.168.1.102
+      ZBX_SERVER_HOST: 192.168.10.104
       ZBX_HOSTNAME: "{{ inventory_hostname }}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro

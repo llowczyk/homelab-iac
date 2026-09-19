@@ -24,13 +24,17 @@ variable "vm_user_password" {
 
 # --- vm setup defaults ---
 variable "network_gateway" {
-  type    = string
-  default = "192.168.1.1"
+  type    = map(string)
+  default = {
+    "10" = "192.168.10.1"
+    "20" = "192.168.20.1"
+    "30" = "192.168.30.1"
+  }
 }
 
 variable "dns_server" {
   type    = string
-  default = "192.168.1.10"
+  default = "192.168.10.10"
 }
 
 variable "default_username" {

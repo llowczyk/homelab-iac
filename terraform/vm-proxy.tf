@@ -1,7 +1,7 @@
 resource "proxmox_virtual_environment_vm" "proxy" {
   name        = "proxy"
   node_name   = "pve01"
-  vm_id       = 107
+  vm_id       = 103
   tags        = local.vm_tags["proxy"]
   machine     = var.machine_type
   description = local.vm_descriptions["proxy"]
@@ -29,13 +29,14 @@ resource "proxmox_virtual_environment_vm" "proxy" {
 
   network_device {
     bridge = var.network_bridge
+    vlan_id = 10
   }
 
   initialization {
     ip_config {
       ipv4 {
-        address = "192.168.1.107/24"
-        gateway = var.network_gateway
+        address = "192.168.10.103/24"
+        gateway = var.network_gateway["10"]
       }
     }
 
@@ -56,5 +57,9 @@ resource "proxmox_virtual_environment_vm" "proxy" {
 
   agent {
     enabled = var.agent_enabled
+  }
+
+  lifecycle {
+    ignore_changes = [initialization[0].user_account[0].password]
   }
 }

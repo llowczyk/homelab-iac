@@ -1,14 +1,13 @@
 resource "proxmox_virtual_environment_vm" "torrentbox" {
   name        = "torrentbox"
   node_name   = "pve02"
-  vm_id       = 104
-  migrate     = true
+  vm_id       = 106
   tags        = local.vm_tags["torrentbox"]
   machine     = var.machine_type
   description = local.vm_descriptions["torrentbox"]
 
   clone {
-    vm_id = 900
+    vm_id = 901
     full  = true
   }
 
@@ -30,13 +29,14 @@ resource "proxmox_virtual_environment_vm" "torrentbox" {
 
   network_device {
     bridge = var.network_bridge
+    vlan_id = 30
   }
 
   initialization {
     ip_config {
       ipv4 {
-        address = "192.168.1.104/24"
-        gateway = var.network_gateway
+        address = "192.168.30.106/24"
+        gateway = var.network_gateway["30"]
       }
     }
 
@@ -57,5 +57,9 @@ resource "proxmox_virtual_environment_vm" "torrentbox" {
 
   agent {
     enabled = var.agent_enabled
+  }
+
+  lifecycle {
+    ignore_changes = [initialization[0].user_account[0].password]
   }
 }

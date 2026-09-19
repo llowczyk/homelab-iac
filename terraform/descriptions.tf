@@ -53,7 +53,7 @@ locals {
     nas = <<-EOT
       ## nas
 
-      - nfs export (192.168.1.0/24) + samba
+      - nfs export (192.168.10.0/24, 192.168.20.0/24, 192.168.30.0/24) + samba
       - 2TB disk passed through via scsi1 — MANUAL attach, not terraform-managed
       - Disk UUID: cae72027-5bd7-4091-b187-4c3a8a4bc3e8
       - managed via homelab-iac (terraform + ansible)

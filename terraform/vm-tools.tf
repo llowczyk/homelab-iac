@@ -1,15 +1,10 @@
 resource "proxmox_virtual_environment_vm" "tools" {
   name        = "tools"
   node_name   = "pve01"
-  vm_id       = 108
+  vm_id       = 105
   tags        = local.vm_tags["tools"]
   machine     = var.machine_type
   description = local.vm_descriptions["tools"]
-
-  clone {
-    vm_id = 900
-    full  = true
-  }
 
   cpu {
     cores = 4
@@ -29,13 +24,14 @@ resource "proxmox_virtual_environment_vm" "tools" {
 
   network_device {
     bridge = var.network_bridge
+    vlan_id = 10
   }
 
   initialization {
     ip_config {
       ipv4 {
-        address = "192.168.1.108/24"
-        gateway = var.network_gateway
+        address = "192.168.10.105/24"
+        gateway = var.network_gateway["10"]
       }
     }
 
@@ -56,5 +52,9 @@ resource "proxmox_virtual_environment_vm" "tools" {
 
   agent {
     enabled = var.agent_enabled
+  }
+
+  lifecycle {
+    ignore_changes = [initialization[0].user_account[0].password]
   }
 }

@@ -1,7 +1,7 @@
 resource "proxmox_virtual_environment_vm" "nas" {
   name        = "nas"
   node_name   = "pve02"
-  vm_id       = 101
+  vm_id       = 102
   tags        = local.vm_tags["nas"]
   machine     = var.machine_type
   description = local.vm_descriptions["nas"]
@@ -29,13 +29,14 @@ resource "proxmox_virtual_environment_vm" "nas" {
 
   network_device {
     bridge = var.network_bridge
+    vlan_id = 20
   }
 
   initialization {
     ip_config {
       ipv4 {
-        address = "192.168.1.101/24"
-        gateway = var.network_gateway
+        address = "192.168.20.102/24"
+        gateway = var.network_gateway["20"]
       }
     }
 
@@ -56,5 +57,9 @@ resource "proxmox_virtual_environment_vm" "nas" {
 
   agent {
     enabled = var.agent_enabled
+  }
+
+  lifecycle {
+    ignore_changes = [initialization[0].user_account[0].password]
   }
 }

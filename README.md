@@ -40,20 +40,26 @@ Right now, this repository is both a working system and a learning project. Ever
 
   Raspberry Pi acts as a quorum device so the cluster survives a single node loss without a full 3-node setup.
 
-- **Internet**: ISP ODU feeding an ISP IDU (vendor-locked to ODU). IDU
-  currently acts as the primary router/DHCP server for the whole
-  network. The connection sits behind carrier-grade NAT (CGNAT), it means no
-  public IP and no inbound port-forwarding for the time being.
+- **Internet**: ISP ODU feeding an ISP IDU (vendor-locked). The IDU
+  itself still routes and provides WiFi for general household devices
+  (wife's appliances, smart bulbs, etc.) - it isn't bypassed. Then, a
+  **TP-Link ER605** router sits behind it, handling everything in this
+  lab: inter-VLAN routing, DHCP, and firewall.
+   
+  It's a double-NAT setup (ISP IDU + ER605), on top of the ISP connection
+  already being behind carrier-grade NAT (CGNAT) with no public IP -
+  no inbound port-forwarding is possible whatsoever.
 
-- **Switch**: a 5-port TP-Link SG105E managed switch (VLAN and
-  port-mirroring capable).
+- **Switch**: a 5-port **TP-Link SG105Ei** managed switch (802.1Q VLAN and
+  port-mirroring capable) doing the tagging. All routing and DHCP lives on
+  the ER605.
   
   | Port | Device |
   |---|---|
   | 1 | homelab-rpi |
   | 2 | pve01 |
   | 3 | pve02 |
-  | 4 | - |
+  | 4 | management PC |
   | 5 | WAN uplink |
 
 - **NAS**: a 2TB HDD physically passed through to a NAS virtual machine via `scsi1` and `USB-SATA` adapter. This disk is **never** managed by Terraform. It's attached and moved between VMs by hand, because it's the one piece of hardware in this lab that can't be casually rebuilt if something goes wrong with it. The virtual machine responsible for handling network attached storage is IaC managed, though.
@@ -110,14 +116,14 @@ Virtual machines not managed by Terraform have `homelab-` prefix in the name. Ia
 
 </details>
 
-## Networking (in progress)
+## Networking
 
-I'm planning a migration from a single flat `192.168.1.0/24` to a
-segmented, VLAN-based design behind a OPNsense.
+The network is segmented into VLANs behind ER605 gateway, replacing
+the initial flat single-subnet design I started with.
 
 | VLAN | Subnet | Purpose |
 |---|---|---|
-| 1 (native) | `192.168.1.0/24` | WiFi / non-lab |
+| 1 | `192.168.1.0/24` | WiFi / non-lab |
 | 10 | `192.168.10.0/24` | core / management |
 | 20 | `192.168.20.0/24` | services |
 | 30 | `192.168.30.0/24` | isolated |
@@ -131,11 +137,11 @@ Docker-based runner (on `homelab-devops`):
   `terraform/**`.
 - **`terraform apply`** -- manual-trigger only (`workflow_dispatch`).
   Never runs automatically, gated behind a "Run workflow" button.
-- **Terraform drift check** -- scheduled twice a day, fails the build if
+- **`Terraform drift check`** -- scheduled twice a day, fails the build if
   real infrastructure has diverged from what is declared in code.
-- **Ansible drift check** -- same cadence, runs every playbook in
+- **`Ansible drift check`** -- same cadence, runs every playbook in
   `--check` mode against the live fleet and fails when a drift is found.
-- **OS update check** -- scheduled once a day, checks every host in the
+- **`OS update check`** -- scheduled once a day, checks every host in the
   lab for available OS package updates and reports
   the count. Report-only, nothing gets installed automatically.
 
@@ -147,10 +153,10 @@ At this point, no alerting is wired up. These checks are meant to be glanced at 
 - **Uptime Kuma** -- simple uptime tracking.
 - **Loki + Promtail** -- centralized logging, shipped from every host.
 - **Grafana** -- zabbix, loki and everything else in one place.
-- **Diun** -- checks every running container for new new images.
+- **Diun** -- checks every running container for new images.
 - **Homer** -- a single dashboard tying the above together.
 
-Every docker image across the fleet is pinned to an immutable
+Every container image across the fleet is pinned to an immutable
 `sha256` digest. Nothing updates silently.
 
 ## NAS
@@ -190,11 +196,12 @@ homelab-iac/
 * Shared values that repeat across every VM (gateway, DNS server, SSH
   key path, datastore, network bridge) live in `variables.tf`.
 * Terraform never manages a physical disk passthrough or USB device directly. 
-  Some   things are safer handled by hand.
+  Some things are safer handled by hand.
 * Compose files always pin images by digest, never by floating tag.
 * Playbooks are split by concern (one `deploy-*.yml` per service stack).
 * Anything handling a secret pulls it from `group_vars/*.yml` (gitignored
   locally) or from Gitea Actions Secrets in CI.
+* Ansible vault has been implemented.
 * Every host's Docker socket permission fix (`group_add` with the
   correct GID) is baked into the compose file itself.
 * ...

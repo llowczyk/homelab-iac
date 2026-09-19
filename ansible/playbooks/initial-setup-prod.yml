@@ -70,10 +70,11 @@
     - name: mount NAS share and persist in fstab
       ansible.posix.mount:
         path: /mnt/nas
-        src: "192.168.1.101:/mnt/nas"
+        src: "192.168.20.102:/mnt/nas"
         fstype: nfs
         opts: defaults,_netdev,nofail,x-systemd.automount
         state: mounted
+      when: inventory_hostname != 'nas'
 
     # --- portainer agent ---
     - name: create portainer-agent compose directory

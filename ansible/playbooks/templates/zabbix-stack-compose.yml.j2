@@ -1,7 +1,7 @@
 version: '3.9'
 services:
   zabbix-db:
-    image: postgres@sha256:74e110c41804365e3915fcc09d5e7a1eff50161aaa94d5da0e58e0cd75ae509c
+    image: postgres@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685
     container_name: zabbix-db
     ports:
       - "5433:5432"
@@ -21,7 +21,7 @@ services:
       retries: 5
     restart: unless-stopped
   zabbix-server:
-    image: zabbix/zabbix-server-pgsql@sha256:8c684fb3c00d1fbdc406e399625f90ef87c1a337b57f5bb8e2ba1bbb04c96b39
+    image: zabbix/zabbix-server-pgsql@sha256:9c3289540e9d2c7abd73979fde4bfa3f9aa3c2b16ecb4a3b7d776436013599f5
     container_name: zabbix-server
     environment:
       DB_SERVER_HOST: zabbix-db
@@ -39,14 +39,14 @@ services:
       - zabbix-net
     restart: unless-stopped
   zabbix-web:
-    image: zabbix/zabbix-web-nginx-pgsql@sha256:ee264dbdfa4cb5ffece9b1ee7a30fc64d3ed71ba6923c488908368991b7f455c
+    image: zabbix/zabbix-web-nginx-pgsql@sha256:e5b30ffbbc3026e9974f7c61896c90cccd4d693ed5a910a937406f55db5fe78f
     container_name: zabbix-web
     environment:
       DB_SERVER_HOST: zabbix-db
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-      ZBX_SERVER_HOST: zabbix-server
+      ZBX_SERVER_HOST: "zabbix-server,172.21.0.1"
       PHP_TZ: ${PHP_TZ}
     depends_on:
       - zabbix-server
@@ -62,7 +62,7 @@ services:
     group_add:
       - "988"
     environment:
-      ZBX_SERVER_HOST: zabbix-server
+      ZBX_SERVER_HOST: "zabbix-server,172.21.0.1"
       ZBX_HOSTNAME: ${AGENT_HOSTNAME}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro

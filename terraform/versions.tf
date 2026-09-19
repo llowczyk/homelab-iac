@@ -11,7 +11,7 @@ terraform {
     key    = "homelab-prod/terraform.tfstate"
 
     endpoints = {
-      s3 = "http://192.168.1.105:9000"
+      s3 = "http://192.168.10.101:9000"
     }
 
     region                      = "main"

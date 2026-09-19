@@ -1,27 +1,27 @@
-output "monitoring_ip" {
-  value = "192.168.1.102"
+output "nas" {
+  value = "192.168.20.102"
 }
 
-output "torrentbox_ip" {
-  value = "192.168.1.104"
+output "proxy" {
+  value = "192.168.10.103"
 }
 
-output "mediaserver_ip" {
-  value = "192.168.1.103"
+output "monitor" {
+  value = "192.168.10.104"
 }
 
-output "jumpbox_ip" {
-  value = "192.168.1.106"
+output "tools" {
+  value = "192.168.10.105"
 }
 
-output "proxy_ip" {
-  value = "192.168.1.107"
+output "torrentbox" {
+  value = "192.168.30.106"
 }
 
-output "tools_ip" {
-  value = "192.168.1.108"
+output "mediaserver" {
+  value = "192.168.20.107"
 }
 
-output "nas_ip" {
-  value = "192.168.1.101"
+output "jumpbox" {
+  value = "192.168.10.108"
 }
