@@ -17,13 +17,14 @@
         state: directory
         mode: "0755"
 
-    - name: mount NAS share and persist in fstab
+    - name: persist NAS share in fstab
       ansible.posix.mount:
         path: /mnt/nas
         src: "192.168.20.102:/mnt/nas"
         fstype: nfs
         opts: defaults,_netdev,nofail,x-systemd.automount
-        state: mounted
+        state: present
+      notify: reload nas automount
 
     # --- infra network ---
     - name: ensure infra Docker network exists

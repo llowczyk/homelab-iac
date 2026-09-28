@@ -1,0 +1,2 @@
+#ansible image for local runs and CI
+ansible==12.3.0

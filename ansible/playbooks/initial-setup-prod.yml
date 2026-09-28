@@ -67,14 +67,15 @@
         state: directory
         mode: "0755"
 
-    - name: mount NAS share and persist in fstab
+    - name: persist NAS share in fstab
       ansible.posix.mount:
         path: /mnt/nas
         src: "192.168.20.102:/mnt/nas"
         fstype: nfs
         opts: defaults,_netdev,nofail,x-systemd.automount
-        state: mounted
+        state: present
       when: inventory_hostname != 'nas'
+      notify: reload nas automount
 
     # --- portainer agent ---
     - name: create portainer-agent compose directory
@@ -140,3 +141,10 @@
       community.docker.docker_compose_v2:
         project_src: /opt/zabbix-agent
         state: present
+
+  handlers:
+    - name: reload nas automount
+      ansible.builtin.systemd:
+        name: mnt-nas.automount
+        state: restarted
+        daemon_reload: true

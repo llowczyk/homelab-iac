@@ -13,7 +13,7 @@ jobs:
         run: |
           apt-get update -qq
           apt-get install -y -qq python3-pip openssh-client
-          pip install --break-system-packages ansible
+          pip install --break-system-packages -r ansible/requirements.txt
       - name: set up SSH key and vault password
         run: |
           mkdir -p ~/.ssh
