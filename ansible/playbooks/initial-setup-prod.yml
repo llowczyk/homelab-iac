@@ -123,7 +123,7 @@
       community.docker.docker_compose_v2:
         project_src: /opt/diun
         state: present
-        
+
     # --- zabbix agent ---
     - name: create zabbix-agent compose directory
       file:

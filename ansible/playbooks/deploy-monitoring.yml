@@ -88,7 +88,7 @@
       community.docker.docker_compose_v2:
         project_src: /opt/monitoring/zabbix
         state: present
-    
+
     - name: fix ownership of zabbix ssh keys inside container
       community.docker.docker_container_exec:
         container: zabbix-server
