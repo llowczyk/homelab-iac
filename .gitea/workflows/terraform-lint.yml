@@ -1,0 +1,45 @@
+name: terraform lint
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "terraform/**"
+      - ".gitea/workflows/terraform-lint.yml"
+  pull_request:
+    paths:
+      - "terraform/**"
+
+jobs:
+  terraform-lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: terraform
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: install terraform and tflint
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq wget unzip
+          wget -q https://releases.hashicorp.com/terraform/1.10.5/terraform_1.10.5_linux_amd64.zip
+          unzip -o terraform_1.10.5_linux_amd64.zip
+          mv terraform /usr/local/bin/
+          terraform -version
+          wget -q https://github.com/terraform-linters/tflint/releases/download/v0.54.0/tflint_linux_amd64.zip
+          unzip -o tflint_linux_amd64.zip
+          mv tflint /usr/local/bin/
+          tflint --version
+
+      - name: terraform init (no backend)
+        run: terraform init -backend=false -input=false
+
+      - name: terraform validate
+        run: terraform validate
+
+      - name: tflint
+        run: |
+          tflint --init
+          tflint
