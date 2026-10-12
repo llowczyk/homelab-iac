@@ -23,7 +23,7 @@ resource "proxmox_virtual_environment_vm" "tools" {
   }
 
   network_device {
-    bridge = var.network_bridge
+    bridge  = var.network_bridge
     vlan_id = 10
   }
 

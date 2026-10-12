@@ -24,7 +24,7 @@ variable "vm_user_password" {
 
 # --- vm setup defaults ---
 variable "network_gateway" {
-  type    = map(string)
+  type = map(string)
   default = {
     "10" = "192.168.10.1"
     "20" = "192.168.20.1"

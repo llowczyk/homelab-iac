@@ -28,7 +28,7 @@ resource "proxmox_virtual_environment_vm" "torrentbox" {
   }
 
   network_device {
-    bridge = var.network_bridge
+    bridge  = var.network_bridge
     vlan_id = 30
   }
 
