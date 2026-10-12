@@ -9,5 +9,6 @@ locals {
     tools       = sort(concat(local.common_tags, ["observability"]))
     nas         = sort(concat(local.common_tags, ["nfs", "samba"]))
     jumpbox     = sort(concat(local.common_tags, ["jumphost", "tailscale"]))
+    gameserver  = sort(concat(local.common_tags, ["games"]))
   }
 }

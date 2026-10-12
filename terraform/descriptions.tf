@@ -65,5 +65,11 @@ locals {
 
       - tailscale
     EOT
- }
+
+    gameserver = <<-EOT
+      ## gameserver
+
+      - games
+    EOT
+  }
 }
