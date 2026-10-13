@@ -39,6 +39,11 @@ jobs:
       - name: terraform validate
         run: terraform validate
 
+      - name: dummy ssh public key (tflint evaluates file() in module inputs)
+        run: |
+          mkdir -p ~/.ssh
+          echo "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDummyKeyForLintOnly lint@ci" > ~/.ssh/id_ed25519.pub
+
       - name: tflint
         run: |
           tflint --init
