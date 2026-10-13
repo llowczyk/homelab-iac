@@ -1,10 +1,28 @@
 #!/bin/bash
-set -e
+set -euo pipefail
+exec >> /var/log/rpi-sd-image-backup.log 2>&1
+echo "=== $(date -Is) start"
+
 DATE=$(date +%Y-%m-%d)
 DEST=/mnt/nas/backups/rpi/image
+KEEP=3
+PING_URL=""    # optional Uptime Kuma push URL
+
+timeout 60 ls /mnt/nas >/dev/null
+findmnt -n -t nfs4 /mnt/nas >/dev/null || { echo "NAS not mounted, aborting"; exit 1; }
+
 mkdir -p "$DEST"
+rm -f "$DEST"/*.tmp                      # leftovers from an earlier failed run
+TMP="$DEST/sdcard-$DATE.img.gz.tmp"
+trap 'rm -f "$TMP"' EXIT
 
 sync
-dd if=/dev/mmcblk0 bs=4M conv=sync,noerror status=progress | gzip > "$DEST/sdcard-$DATE.img.gz"
+dd if=/dev/mmcblk0 bs=4M status=none | gzip -c > "$TMP"
+gzip -t "$TMP"                           # verify the archive before promoting it
+mv "$TMP" "$DEST/sdcard-$DATE.img.gz"
 
-ls -t "$DEST"/sdcard-*.img.gz | tail -n +4 | xargs -r rm --
+# retention: only good (renamed) images are counted
+ls -1t "$DEST"/sdcard-*.img.gz | tail -n +$((KEEP + 1)) | xargs -r rm --
+
+echo "=== $(date -Is) done"
+[ -z "$PING_URL" ] || curl -fsS -m 10 "$PING_URL" >/dev/null

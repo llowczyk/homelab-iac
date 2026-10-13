@@ -125,7 +125,7 @@
         minute: "30"
         hour: "3"
         user: ansible
-        job: "sudo /home/ansible/rpi-tar-backup.sh >> /var/log/rpi-tar-backup.log 2>&1"
+        job: "sudo /home/ansible/rpi-tar-backup.sh"
 
     - name: Schedule weekly SD card image backup
       ansible.builtin.cron:
@@ -134,8 +134,7 @@
         hour: "4"
         weekday: "0"
         user: ansible
-        job: "sudo /home/ansible/rpi-sd-image-backup.sh >> /var/log/rpi-sd-image-backup.log 2>&1"
-
+        job: "sudo /home/ansible/rpi-sd-image-backup.sh"
 
   handlers:
     - name: Reload nas automount

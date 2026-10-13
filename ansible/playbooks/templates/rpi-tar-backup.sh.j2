@@ -1,9 +1,26 @@
 #!/bin/bash
-set -e
+set -euo pipefail
+exec >> /var/log/rpi-tar-backup.log 2>&1
+echo "=== $(date -Is) start"
+
 DATE=$(date +%Y-%m-%d)
 DEST=/mnt/nas/backups/rpi/tar
+SRC=/home/pi/docker-files/adguard
+KEEP=14
+PING_URL=""    # optional Uptime Kuma push URL
+
+# guard: trigger the autofs mount, then require a real NFS mount
+timeout 60 ls /mnt/nas >/dev/null
+findmnt -n -t nfs4 /mnt/nas >/dev/null || { echo "NAS not mounted, aborting"; exit 1; }
+
 mkdir -p "$DEST"
+TMP="$DEST/adguard-$DATE.tar.gz.tmp"
+trap 'rm -f "$TMP"' EXIT
+tar czf "$TMP" -C "$SRC" work conf
+mv "$TMP" "$DEST/adguard-$DATE.tar.gz"
 
-tar czf "$DEST/adguard-$DATE.tar.gz" -C /home/pi/docker-files/adguard work conf
+# retention: keep the newest $KEEP archives, regardless of age
+ls -1t "$DEST"/adguard-*.tar.gz | tail -n +$((KEEP + 1)) | xargs -r rm --
 
-find "$DEST" -name "*.tar.gz" -mtime +14 -delete
+echo "=== $(date -Is) done"
+[ -z "$PING_URL" ] || curl -fsS -m 10 "$PING_URL" >/dev/null
