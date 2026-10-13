@@ -1,6 +1,6 @@
 locals {
   vm_descriptions = {
-    monitoring = <<-EOT
+    monitor = <<-EOT
       ## monitoring
 
       - zabbix server (server + web + postgres db)
