@@ -12,11 +12,11 @@ locals {
     nas         = { node = "pve02", id = 102, vlan = 20, cores = 2, memory = 4096, floating = 2048, disk = 15, clone = true }
     proxy       = { node = "pve01", id = 103, vlan = 10, cores = 4, memory = 3072, floating = 2048, disk = 15, clone = true }
     monitor     = { node = "pve02", id = 104, vlan = 10, cores = 4, memory = 8192, floating = 5120, disk = 50, clone = true }
-    tools       = { node = "pve01", id = 105, vlan = 10, cores = 4, memory = 6144, floating = 2048, disk = 40, clone = false }
+    tools       = { node = "pve01", id = 105, vlan = 10, cores = 4, memory = 4096, floating = 2048, disk = 40, clone = true }
     torrentbox  = { node = "pve02", id = 106, vlan = 30, cores = 2, memory = 4096, floating = 2048, disk = 15, clone = true }
     mediaserver = { node = "pve02", id = 107, vlan = 20, cores = 2, memory = 6144, floating = 4096, disk = 20, clone = true }
     jumpbox     = { node = "pve01", id = 108, vlan = 10, cores = 2, memory = 2048, floating = 1024, disk = 15, clone = true }
-    gameserver  = { node = "pve01", id = 113, vlan = 10, cores = 2, memory = 12288, floating = 8192, disk = 50, clone = true }
+    gameserver  = { node = "pve01", id = 113, vlan = 10, cores = 2, memory = 6144, floating = 4096, disk = 50, clone = true }
   }
 }
 
