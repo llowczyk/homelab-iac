@@ -1,23 +1,23 @@
 ---
-- name: deploy MOTD banner
+- name: Deploy MOTD banner
   hosts: prod:rpi
   become: true
 
   tasks:
-    - name: install figlet
-      apt:
+    - name: Install figlet
+      ansible.builtin.apt:
         name: figlet
         state: present
         update_cache: true
 
-    - name: download ANSI Shadow figlet font
-      get_url:
+    - name: Download ANSI Shadow figlet font
+      ansible.builtin.get_url:
         url: https://raw.githubusercontent.com/xero/figlet-fonts/master/ANSI%20Shadow.flf
         dest: /usr/share/figlet/ANSI-Shadow.flf
         mode: "0644"
 
-    - name: remove default Ubuntu MOTD scripts that clutter the banner
-      file:
+    - name: Remove default Ubuntu MOTD scripts that clutter the banner
+      ansible.builtin.file:
         path: "/etc/update-motd.d/{{ item }}"
         state: absent
       loop:
@@ -31,17 +31,16 @@
         - 97-overlayroot
         - 98-fsck-at-reboot
         - 98-reboot-required
-      ignore_errors: true
 
-    - name: deploy custom MOTD banner script
-      template:
+    - name: Deploy custom MOTD banner script
+      ansible.builtin.template:
         src: templates/motd-banner.j2
         dest: /etc/update-motd.d/00-homelab-banner
         mode: "0755"
 
-    - name: ensure /etc/motd is empty
-      copy:
+    - name: Ensure /etc/motd is empty
+      ansible.builtin.copy:
         content: ""
         dest: /etc/motd
         mode: "0644"
-        force: no
+        force: false

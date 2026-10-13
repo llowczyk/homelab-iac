@@ -1,113 +1,125 @@
 ---
-- name: deploy Pi services (adguard, homer, wikijs, zabbix-agent) and backups
+- name: Deploy Pi services (adguard, homer, wikijs, zabbix-agent) and backups
   hosts: rpi
   become: true
 
   tasks:
     # --- NAS mount ---
-    - name: install NFS client
-      apt:
+    - name: Install NFS client
+      ansible.builtin.apt:
         name: nfs-common
         state: present
         update_cache: true
 
-    - name: create NAS mount point
-      file:
+    - name: Create NAS mount point
+      ansible.builtin.file:
         path: /mnt/nas
         state: directory
         mode: "0755"
 
-    - name: persist NAS share in fstab
+    - name: Persist NAS share in fstab
       ansible.posix.mount:
         path: /mnt/nas
         src: "192.168.20.102:/mnt/nas"
         fstype: nfs
         opts: defaults,_netdev,nofail,x-systemd.automount
         state: present
-      notify: reload nas automount
+      notify: Reload nas automount
 
     # --- infra network ---
-    - name: ensure infra Docker network exists
+    - name: Ensure infra Docker network exists
       community.docker.docker_network:
         name: infra
         state: present
 
     # --- adguard ---
-    - name: create adguard directory
-      file: { path: /home/pi/docker-files/adguard, state: directory, mode: "0755" }
-    - name: deploy adguard compose file
-      template: { src: templates/rpi-adguard-compose.yml.j2, dest: /home/pi/docker-files/adguard/adguard-compose.yaml, mode: "0644" }
-    - name: start adguard
+    - name: Create adguard directory
+      ansible.builtin.file: { path: /home/pi/docker-files/adguard, state: directory, mode: "0755" }
+    - name: Deploy adguard compose file
+      ansible.builtin.template: { src: templates/rpi-adguard-compose.yml.j2, dest: /home/pi/docker-files/adguard/adguard-compose.yaml, mode: "0644" }
+    - name: Start adguard
       community.docker.docker_compose_v2: { project_src: /home/pi/docker-files/adguard, files: [adguard-compose.yaml], state: present }
 
     # --- homer ---
-    - name: create homer directory
-      file: { path: /home/pi/docker-files/homer, state: directory, mode: "0755" }
-    - name: deploy homer compose file
-      template: { src: templates/rpi-homer-compose.yml.j2, dest: /home/pi/docker-files/homer/homer-compose.yaml, mode: "0644" }
-    - name: deploy homer config
-      template: { src: templates/rpi-homer-config.yml.j2, dest: /home/pi/docker-files/homer/config/config.yml, mode: "0644" }
-    - name: start homer
+    - name: Create homer directory
+      ansible.builtin.file: { path: /home/pi/docker-files/homer, state: directory, mode: "0755" }
+    - name: Deploy homer compose file
+      ansible.builtin.template: { src: templates/rpi-homer-compose.yml.j2, dest: /home/pi/docker-files/homer/homer-compose.yaml, mode: "0644" }
+    - name: Deploy homer config
+      ansible.builtin.template: { src: templates/rpi-homer-config.yml.j2, dest: /home/pi/docker-files/homer/config/config.yml, mode: "0644" }
+    - name: Start homer
       community.docker.docker_compose_v2: { project_src: /home/pi/docker-files/homer, files: [homer-compose.yaml], state: present }
 
     # --- zabbix-agent ---
-    - name: create zabbix-agent directory
-      file: { path: /home/pi/docker-files/zabbix-agent, state: directory, mode: "0755" }
-    - name: deploy zabbix-agent compose file
-      template: { src: templates/rpi-zabbix-agent-compose.yml.j2, dest: /home/pi/docker-files/zabbix-agent/zabbix-agent-compose.yaml, mode: "0644" }
-    - name: start zabbix-agent
+    - name: Create zabbix-agent directory
+      ansible.builtin.file: { path: /home/pi/docker-files/zabbix-agent, state: directory, mode: "0755" }
+    - name: Deploy zabbix-agent compose file
+      ansible.builtin.template:
+        src: templates/rpi-zabbix-agent-compose.yml.j2
+        dest: /home/pi/docker-files/zabbix-agent/zabbix-agent-compose.yaml
+        mode: "0644"
+    - name: Start zabbix-agent
       community.docker.docker_compose_v2: { project_src: /home/pi/docker-files/zabbix-agent, files: [zabbix-agent-compose.yaml], state: present }
 
     # --- promtail ---
-    - name: create promtail directory
-      file: { path: /home/pi/docker-files/promtail, state: directory, mode: "0755" }
-    - name: deploy promtail compose file
-      template: { src: templates/rpi-promtail-compose.yml.j2, dest: /home/pi/docker-files/promtail/promtail-compose.yaml, mode: "0644" }
-    - name: deploy promtail config
-      template: { src: templates/promtail-config.yml.j2, dest: /home/pi/docker-files/promtail/promtail-config.yml, mode: "0644" }
-    - name: start promtail
+    - name: Create promtail directory
+      ansible.builtin.file: { path: /home/pi/docker-files/promtail, state: directory, mode: "0755" }
+    - name: Deploy promtail compose file
+      ansible.builtin.template:
+        src: templates/rpi-promtail-compose.yml.j2
+        dest: /home/pi/docker-files/promtail/promtail-compose.yaml
+        mode: "0644"
+    - name: Deploy promtail config
+      ansible.builtin.template: { src: templates/promtail-config.yml.j2, dest: /home/pi/docker-files/promtail/promtail-config.yml, mode: "0644" }
+    - name: Start promtail
       community.docker.docker_compose_v2: { project_src: /home/pi/docker-files/promtail, files: [promtail-compose.yaml], state: present }
 
     # --- portainer agent ---
-    - name: create portainer-agent directory
-      file: { path: /home/pi/docker-files/portainer-agent, state: directory, mode: "0755" }
-    - name: deploy portainer-agent compose file
-      template: { src: templates/rpi-portainer-agent-compose.yml.j2, dest: /home/pi/docker-files/portainer-agent/portainer-agent-compose.yaml, mode: "0644" }
-    - name: start portainer-agent
-      community.docker.docker_compose_v2: { project_src: /home/pi/docker-files/portainer-agent, files: [portainer-agent-compose.yaml], state: present }
+    - name: Create portainer-agent directory
+      ansible.builtin.file: { path: /home/pi/docker-files/portainer-agent, state: directory, mode: "0755" }
+    - name: Deploy portainer-agent compose file
+      ansible.builtin.template:
+        src: templates/rpi-portainer-agent-compose.yml.j2
+        dest: /home/pi/docker-files/portainer-agent/portainer-agent-compose.yaml
+        mode: "0644"
+    - name: Start portainer-agent
+      community.docker.docker_compose_v2:
+        project_src: /home/pi/docker-files/portainer-agent
+        files: [portainer-agent-compose.yaml]
+        state: present
 
     # --- diun ---
-    - name: create diun directory
-      file:
+    - name: Create diun directory
+      ansible.builtin.file:
         path: /home/pi/docker-files/diun
         state: directory
         mode: "0755"
 
-    - name: deploy diun compose file
-      template:
+    - name: Deploy diun compose file
+      ansible.builtin.template:
         src: templates/diun-compose.yml.j2
         dest: /home/pi/docker-files/diun/docker-compose.yml
         mode: "0644"
 
-    - name: start diun
+    - name: Start diun
       community.docker.docker_compose_v2:
         project_src: /home/pi/docker-files/diun
         state: present
 
     # --- backups ---
-    - name: deploy tar backup script
-      template:
+    - name: Deploy tar backup script
+      ansible.builtin.template:
         src: templates/rpi-tar-backup.sh.j2
         dest: /home/ansible/rpi-tar-backup.sh
         mode: "0750"
 
-    - name: deploy SD image backup script
-      template:
+    - name: Deploy SD image backup script
+      ansible.builtin.template:
         src: templates/rpi-sd-image-backup.sh.j2
         dest: /home/ansible/rpi-sd-image-backup.sh
         mode: "0750"
 
-    - name: schedule daily tar backup
+    - name: Schedule daily tar backup
       ansible.builtin.cron:
         name: "rpi daily tar backup"
         minute: "30"
@@ -115,7 +127,7 @@
         user: ansible
         job: "sudo /home/ansible/rpi-tar-backup.sh >> /var/log/rpi-tar-backup.log 2>&1"
 
-    - name: schedule weekly SD card image backup
+    - name: Schedule weekly SD card image backup
       ansible.builtin.cron:
         name: "rpi weekly sd card image backup"
         minute: "0"
@@ -123,3 +135,11 @@
         weekday: "0"
         user: ansible
         job: "sudo /home/ansible/rpi-sd-image-backup.sh >> /var/log/rpi-sd-image-backup.log 2>&1"
+
+
+  handlers:
+    - name: Reload nas automount
+      ansible.builtin.systemd:
+        name: mnt-nas.automount
+        state: restarted
+        daemon_reload: true

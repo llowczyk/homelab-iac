@@ -1,12 +1,12 @@
 ---
-- name: initial VM setup — Docker, NAS mount, Portainer agent, Zabbix agent
+- name: Initial VM setup — Docker, NAS mount, Portainer agent, Zabbix agent
   hosts: prod
   become: true
 
   tasks:
     # --- docker install ---
-    - name: install prerequisite packages
-      apt:
+    - name: Install prerequisite packages
+      ansible.builtin.apt:
         name:
           - ca-certificates
           - curl
@@ -14,26 +14,30 @@
         state: present
         update_cache: true
 
-    - name: create keyrings directory
-      file:
+    - name: Create keyrings directory
+      ansible.builtin.file:
         path: /etc/apt/keyrings
         state: directory
         mode: "0755"
 
-    - name: add docker GPG key
-      get_url:
+    - name: Add docker GPG key
+      ansible.builtin.get_url:
         url: https://download.docker.com/linux/ubuntu/gpg
         dest: /etc/apt/keyrings/docker.asc
         mode: "0644"
 
-    - name: add docker apt repository
-      apt_repository:
-        repo: "deb [arch={{ ansible_architecture | regex_replace('x86_64', 'amd64') }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    - name: Add docker apt repository
+      ansible.builtin.apt_repository:
+        repo: >-
+          deb [arch={{ ansible_architecture | regex_replace('x86_64', 'amd64') }}
+          signed-by=/etc/apt/keyrings/docker.asc]
+          https://download.docker.com/linux/ubuntu
+          {{ ansible_distribution_release }} stable
         state: present
         filename: docker
 
-    - name: install Docker packages
-      apt:
+    - name: Install Docker packages
+      ansible.builtin.apt:
         name:
           - docker-ce
           - docker-ce-cli
@@ -42,32 +46,32 @@
         state: present
         update_cache: true
 
-    - name: add user to docker group
-      user:
+    - name: Add user to docker group
+      ansible.builtin.user:
         name: "{{ ansible_user }}"
         groups: docker
         append: true
 
-    - name: ensure Docker service is enabled and running
-      systemd:
+    - name: Ensure Docker service is enabled and running
+      ansible.builtin.systemd:
         name: docker
         enabled: true
         state: started
 
     # --- NAS mount ---
-    - name: install NFS client
-      apt:
+    - name: Install NFS client
+      ansible.builtin.apt:
         name: nfs-common
         state: present
         update_cache: true
 
-    - name: create NAS mount point
-      file:
+    - name: Create NAS mount point
+      ansible.builtin.file:
         path: /mnt/nas
         state: directory
         mode: "0755"
 
-    - name: persist NAS share in fstab
+    - name: Persist NAS share in fstab
       ansible.posix.mount:
         path: /mnt/nas
         src: "192.168.20.102:/mnt/nas"
@@ -75,75 +79,75 @@
         opts: defaults,_netdev,nofail,x-systemd.automount
         state: present
       when: inventory_hostname != 'nas'
-      notify: reload nas automount
+      notify: Reload nas automount
 
     # --- portainer agent ---
-    - name: create portainer-agent compose directory
-      file:
+    - name: Create portainer-agent compose directory
+      ansible.builtin.file:
         path: /opt/portainer-agent
         state: directory
         mode: "0755"
       tags: portainer_agent
 
-    - name: deploy portainer-agent compose file
-      template:
+    - name: Deploy portainer-agent compose file
+      ansible.builtin.template:
         src: templates/portainer-agent-compose.yml.j2
         dest: /opt/portainer-agent/docker-compose.yml
         mode: "0644"
       tags: portainer_agent
 
-    - name: start portainer-agent
+    - name: Start portainer-agent
       community.docker.docker_compose_v2:
         project_src: /opt/portainer-agent
         state: present
       tags: portainer_agent
 
     # --- promtail ---
-    - name: create promtail directory
-      file: { path: /opt/promtail, state: directory, mode: "0755" }
-    - name: deploy promtail compose file
-      template: { src: templates/promtail-compose.yml.j2, dest: /opt/promtail/docker-compose.yml, mode: "0644" }
-    - name: deploy promtail config
-      template: { src: templates/promtail-config.yml.j2, dest: /opt/promtail/promtail-config.yml, mode: "0644" }
-    - name: start promtail
+    - name: Create promtail directory
+      ansible.builtin.file: { path: /opt/promtail, state: directory, mode: "0755" }
+    - name: Deploy promtail compose file
+      ansible.builtin.template: { src: templates/promtail-compose.yml.j2, dest: /opt/promtail/docker-compose.yml, mode: "0644" }
+    - name: Deploy promtail config
+      ansible.builtin.template: { src: templates/promtail-config.yml.j2, dest: /opt/promtail/promtail-config.yml, mode: "0644" }
+    - name: Start promtail
       community.docker.docker_compose_v2: { project_src: /opt/promtail, state: present }
 
     # --- diun ---
-    - name: create diun directory
-      file:
+    - name: Create diun directory
+      ansible.builtin.file:
         path: /opt/diun
         state: directory
         mode: "0755"
-    - name: deploy diun compose file
-      template:
+    - name: Deploy diun compose file
+      ansible.builtin.template:
         src: templates/diun-compose.yml.j2
         dest: /opt/diun/docker-compose.yml
         mode: "0644"
-    - name: start diun
+    - name: Start diun
       community.docker.docker_compose_v2:
         project_src: /opt/diun
         state: present
 
     # --- zabbix agent ---
-    - name: create zabbix-agent compose directory
-      file:
+    - name: Create zabbix-agent compose directory
+      ansible.builtin.file:
         path: /opt/zabbix-agent
         state: directory
         mode: "0755"
 
-    - name: deploy zabbix-agent compose file
-      template:
+    - name: Deploy zabbix-agent compose file
+      ansible.builtin.template:
         src: templates/zabbix-agent-compose.yml.j2
         dest: /opt/zabbix-agent/docker-compose.yml
         mode: "0644"
 
-    - name: start zabbix-agent
+    - name: Start zabbix-agent
       community.docker.docker_compose_v2:
         project_src: /opt/zabbix-agent
         state: present
 
   handlers:
-    - name: reload nas automount
+    - name: Reload nas automount
       ansible.builtin.systemd:
         name: mnt-nas.automount
         state: restarted

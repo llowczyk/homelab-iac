@@ -1,47 +1,51 @@
 ---
-- name: deploy tools VM apps (Portainer, Grafana, Loki, DBGate)
+- name: Deploy tools VM apps (Portainer, Grafana, Loki, DBGate)
   hosts: tools
   become: true
 
   tasks:
+    - name: Ensure Docker network infra exists
+      community.docker.docker_network:
+        name: infra
+
     # --- portainer ---
-    - name: create portainer directory
-      file: { path: /opt/portainer, state: directory, mode: "0755" }
-    - name: deploy portainer compose file
-      template: { src: templates/tools-portainer-compose.yml.j2, dest: /opt/portainer/docker-compose.yml, mode: "0644" }
-    - name: start portainer
+    - name: Create portainer directory
+      ansible.builtin.file: { path: /opt/portainer, state: directory, mode: "0755" }
+    - name: Deploy portainer compose file
+      ansible.builtin.template: { src: templates/tools-portainer-compose.yml.j2, dest: /opt/portainer/docker-compose.yml, mode: "0644" }
+    - name: Start portainer
       community.docker.docker_compose_v2: { project_src: /opt/portainer, state: present }
 
     # --- grafana ---
-    - name: create grafana directory
-      file: { path: /opt/grafana, state: directory, mode: "0755" }
-    - name: deploy grafana compose file
-      template: { src: templates/tools-grafana-compose.yml.j2, dest: /opt/grafana/docker-compose.yml, mode: "0644" }
-    - name: start grafana
+    - name: Create grafana directory
+      ansible.builtin.file: { path: /opt/grafana, state: directory, mode: "0755" }
+    - name: Deploy grafana compose file
+      ansible.builtin.template: { src: templates/tools-grafana-compose.yml.j2, dest: /opt/grafana/docker-compose.yml, mode: "0644" }
+    - name: Start grafana
       community.docker.docker_compose_v2: { project_src: /opt/grafana, state: present }
 
     # --- loki ---
-    - name: create loki directory
-      file: { path: /opt/loki, state: directory, mode: "0755" }
-    - name: deploy loki compose file
-      template: { src: templates/tools-loki-compose.yml.j2, dest: /opt/loki/docker-compose.yml, mode: "0644" }
-    - name: deploy loki config
-      template: { src: templates/tools-loki-config.yml.j2, dest: /opt/loki/loki-config.yml, mode: "0644" }
-    - name: start loki
+    - name: Create loki directory
+      ansible.builtin.file: { path: /opt/loki, state: directory, mode: "0755" }
+    - name: Deploy loki compose file
+      ansible.builtin.template: { src: templates/tools-loki-compose.yml.j2, dest: /opt/loki/docker-compose.yml, mode: "0644" }
+    - name: Deploy loki config
+      ansible.builtin.template: { src: templates/tools-loki-config.yml.j2, dest: /opt/loki/loki-config.yml, mode: "0644" }
+    - name: Start loki
       community.docker.docker_compose_v2: { project_src: /opt/loki, state: present }
 
     # --- wikijs ---
-    - name: create wikijs directory
-      file: { path: /opt/wikijs, state: directory, mode: "0755" }
-    - name: deploy wikijs compose file
-      template: { src: templates/tools-wikijs-compose.yml.j2, dest: /opt/wikijs/docker-compose.yml, mode: "0644" }
-    - name: start wikijs
+    - name: Create wikijs directory
+      ansible.builtin.file: { path: /opt/wikijs, state: directory, mode: "0755" }
+    - name: Deploy wikijs compose file
+      ansible.builtin.template: { src: templates/tools-wikijs-compose.yml.j2, dest: /opt/wikijs/docker-compose.yml, mode: "0644" }
+    - name: Start wikijs
       community.docker.docker_compose_v2: { project_src: /opt/wikijs, state: present }
 
     # --- dbgate ---
-    - name: create dbgate directory
-      file: { path: /opt/dbgate, state: directory, mode: "0755" }
-    - name: deploy dbgate compose file
-      template: { src: templates/tools-dbgate-compose.yml.j2, dest: /opt/dbgate/docker-compose.yml, mode: "0644" }
-    - name: start dbgate
+    - name: Create dbgate directory
+      ansible.builtin.file: { path: /opt/dbgate, state: directory, mode: "0755" }
+    - name: Deploy dbgate compose file
+      ansible.builtin.template: { src: templates/tools-dbgate-compose.yml.j2, dest: /opt/dbgate/docker-compose.yml, mode: "0644" }
+    - name: Start dbgate
       community.docker.docker_compose_v2: { project_src: /opt/dbgate, state: present }

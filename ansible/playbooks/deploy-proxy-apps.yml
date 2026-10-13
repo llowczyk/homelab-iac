@@ -1,12 +1,12 @@
 ---
-- name: deploy NPM on proxy vm
+- name: Deploy NPM on proxy vm
   hosts: proxy
   become: true
 
   tasks:
-    - name: create npm directory
-      file: { path: /opt/npm, state: directory, mode: "0755" }
-    - name: ceploy npm compose file
-      template: { src: templates/npm-compose.yml.j2, dest: /opt/npm/docker-compose.yml, mode: "0644" }
-    - name: start npm
+    - name: Create npm directory
+      ansible.builtin.file: { path: /opt/npm, state: directory, mode: "0755" }
+    - name: Ceploy npm compose file
+      ansible.builtin.template: { src: templates/npm-compose.yml.j2, dest: /opt/npm/docker-compose.yml, mode: "0644" }
+    - name: Start npm
       community.docker.docker_compose_v2: { project_src: /opt/npm, state: present }

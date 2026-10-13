@@ -1,49 +1,51 @@
 ---
-- name: deploy jumpbox (tailscale subnet router)
+- name: Deploy jumpbox (tailscale subnet router)
   hosts: jumpbox
   become: true
 
   tasks:
-    - name: enable ip forwarding
-      sysctl:
+    - name: Enable ip forwarding
+      ansible.posix.sysctl:
         name: net.ipv4.ip_forward
         value: "1"
         sysctl_set: true
         state: present
         reload: true
 
-    - name: add tailscale apt repo key
-      get_url:
+    - name: Add tailscale apt repo key
+      ansible.builtin.get_url:
         url: https://pkgs.tailscale.com/stable/ubuntu/noble.noarmor.gpg
         dest: /usr/share/keyrings/tailscale-archive-keyring.gpg
+        mode: "0644"
       changed_when: false
 
-    - name: add tailscale apt repo
-      get_url:
+    - name: Add tailscale apt repo
+      ansible.builtin.get_url:
         url: https://pkgs.tailscale.com/stable/ubuntu/noble.tailscale-keyring.list
         dest: /etc/apt/sources.list.d/tailscale.list
+        mode: "0644"
       changed_when: false
 
-    - name: install tailscale
-      apt:
+    - name: Install tailscale
+      ansible.builtin.apt:
         name: tailscale
         update_cache: true
 
-    - name: enable tailscaled
-      systemd:
+    - name: Enable tailscaled
+      ansible.builtin.systemd:
         name: tailscaled
         enabled: true
         state: started
 
-    - name: check current tailscale status
-      command: tailscale status --json
+    - name: Check current tailscale status
+      ansible.builtin.command: tailscale status --json
       register: ts_status
       changed_when: false
       failed_when: false
       check_mode: false
 
-    - name: bring up tailscale, advertise subnet
-      command: >
+    - name: Bring up tailscale, advertise subnet
+      ansible.builtin.command: >
         tailscale up
         --authkey={{ tailscale_authkey }}
         --advertise-routes=192.168.10.0/24,192.168.20.0/24,192.168.30.0/24
@@ -52,9 +54,10 @@
         ts_status.rc != 0 or
         '"BackendState": "Running"' not in ts_status.stdout
       register: ts_result
+      changed_when: true
 
-    - name: restart tailscaled to ensure forwarding rules take priority over docker
-      systemd:
+    - name: Restart tailscaled to ensure forwarding rules take priority over docker
+      ansible.builtin.systemd:
         name: tailscaled
         state: restarted
-      when: ts_result is changed
+      when: ts_result is changed # noqa: no-handler
