@@ -1,162 +1,166 @@
 ---
-- name: deploy monitoring stack (docker + zabbix + kuma)
+- name: Deploy monitoring stack (docker + zabbix + kuma)
   hosts: monitoring
   become: true
 
   tasks:
     # --- docker install (same as golden image, copied directly, no sharing) ---
-    - name: install prerequisite packages
-      apt:
+    - name: Install prerequisite packages
+      ansible.builtin.apt:
         name: [ca-certificates, curl, gnupg]
         state: present
         update_cache: true
 
-    - name: create keyrings directory
-      file:
+    - name: Create keyrings directory
+      ansible.builtin.file:
         path: /etc/apt/keyrings
         state: directory
         mode: "0755"
 
-    - name: add Docker GPG key
-      get_url:
+    - name: Add Docker GPG key
+      ansible.builtin.get_url:
         url: https://download.docker.com/linux/ubuntu/gpg
         dest: /etc/apt/keyrings/docker.asc
         mode: "0644"
 
-    - name: add docker apt repository
-      apt_repository:
-        repo: "deb [arch={{ ansible_architecture | regex_replace('x86_64', 'amd64') }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+    - name: Add docker apt repository
+      ansible.builtin.apt_repository:
+        repo: >-
+          deb [arch={{ ansible_architecture | regex_replace('x86_64', 'amd64') }}
+          signed-by=/etc/apt/keyrings/docker.asc]
+          https://download.docker.com/linux/ubuntu
+          {{ ansible_distribution_release }} stable
         state: present
         filename: docker
 
-    - name: install docker packages
-      apt:
+    - name: Install docker packages
+      ansible.builtin.apt:
         name: [docker-ce, docker-ce-cli, containerd.io, docker-compose-plugin]
         state: present
         update_cache: true
 
-    - name: add user to docker group
-      user:
+    - name: Add user to docker group
+      ansible.builtin.user:
         name: "{{ ansible_user }}"
         groups: docker
         append: true
 
-    - name: ensure docker service is enabled and running
-      systemd:
+    - name: Ensure docker service is enabled and running
+      ansible.builtin.systemd:
         name: docker
         enabled: true
         state: started
 
     # --- Zabbix stack ---
-    - name: create zabbix stack directory
-      file:
+    - name: Create zabbix stack directory
+      ansible.builtin.file:
         path: /opt/monitoring/zabbix
         state: directory
         mode: "0755"
 
-    - name: deploy zabbix .env
-      template:
+    - name: Deploy zabbix .env
+      ansible.builtin.template:
         src: templates/zabbix-stack.env.j2
         dest: /opt/monitoring/zabbix/.env
         mode: "0600"
 
-    - name: deploy zabbix compose file
-      template:
+    - name: Deploy zabbix compose file
+      ansible.builtin.template:
         src: templates/zabbix-stack-compose.yml.j2
         dest: /opt/monitoring/zabbix/docker-compose.yml
         mode: "0644"
 
-    - name: create zabbix ssh_keys directory
-      file:
+    - name: Create zabbix ssh_keys directory
+      ansible.builtin.file:
         path: /opt/monitoring/zabbix/ssh_keys
         state: directory
         mode: "0755"
 
-    - name: deploy zabbix ssh private key
-      copy:
+    - name: Deploy zabbix ssh private key
+      ansible.builtin.copy:
         src: templates/zabbix-ssh-keys/id_zabbix
         dest: /opt/monitoring/zabbix/ssh_keys/id_zabbix
         mode: "0600"
 
-    - name: deploy zabbix ssh public key
-      copy:
+    - name: Deploy zabbix ssh public key
+      ansible.builtin.copy:
         src: templates/zabbix-ssh-keys/id_zabbix.pub
         dest: /opt/monitoring/zabbix/ssh_keys/id_zabbix.pub
         mode: "0644"
 
-    - name: start zabbix stack
+    - name: Start zabbix stack
       community.docker.docker_compose_v2:
         project_src: /opt/monitoring/zabbix
         state: present
-    
-    - name: fix ownership of zabbix ssh keys inside container
+
+    - name: Fix ownership of zabbix ssh keys inside container
       community.docker.docker_container_exec:
         container: zabbix-server
         command: chown zabbix:zabbix /var/lib/zabbix/ssh_keys/id_zabbix /var/lib/zabbix/ssh_keys/id_zabbix.pub
         user: root
 
-    - name: fix permissions of zabbix ssh private key inside container
+    - name: Fix permissions of zabbix ssh private key inside container
       community.docker.docker_container_exec:
         container: zabbix-server
         command: chmod 600 /var/lib/zabbix/ssh_keys/id_zabbix
         user: root
 
-    - name: create kuma stack directory
-      file:
+    - name: Create kuma stack directory
+      ansible.builtin.file:
         path: /opt/monitoring/kuma
         state: directory
         mode: "0755"
 
-    - name: deploy kuma compose file
-      template:
+    - name: Deploy kuma compose file
+      ansible.builtin.template:
         src: templates/kuma-compose.yml.j2
         dest: /opt/monitoring/kuma/docker-compose.yml
         mode: "0644"
 
-    - name: create diun directory
-      file:
+    - name: Create diun directory
+      ansible.builtin.file:
         path: /opt/diun
         state: directory
         mode: "0755"
 
-    - name: deploy diun compose file
-      template:
+    - name: Deploy diun compose file
+      ansible.builtin.template:
         src: templates/diun-compose.yml.j2
         dest: /opt/diun/docker-compose.yml
         mode: "0644"
 
-    - name: start diun
+    - name: Start diun
       community.docker.docker_compose_v2:
         project_src: /opt/diun
         state: present
 
-    - name: start kuma stack
+    - name: Start kuma stack
       community.docker.docker_compose_v2:
         project_src: /opt/monitoring/kuma
         state: present
 
-    - name: create promtail directory
-      file: { path: /opt/promtail, state: directory, mode: "0755" }
-    - name: deploy promtail compose file
-      template: { src: templates/promtail-compose.yml.j2, dest: /opt/promtail/docker-compose.yml, mode: "0644" }
-    - name: deploy promtail config
-      template: { src: templates/promtail-config.yml.j2, dest: /opt/promtail/promtail-config.yml, mode: "0644" }
-    - name: start promtail
+    - name: Create promtail directory
+      ansible.builtin.file: { path: /opt/promtail, state: directory, mode: "0755" }
+    - name: Deploy promtail compose file
+      ansible.builtin.template: { src: templates/promtail-compose.yml.j2, dest: /opt/promtail/docker-compose.yml, mode: "0644" }
+    - name: Deploy promtail config
+      ansible.builtin.template: { src: templates/promtail-config.yml.j2, dest: /opt/promtail/promtail-config.yml, mode: "0644" }
+    - name: Start promtail
       community.docker.docker_compose_v2: { project_src: /opt/promtail, state: present }
 
-    - name: create portainer-agent compose directory
-      file:
+    - name: Create portainer-agent compose directory
+      ansible.builtin.file:
         path: /opt/portainer-agent
         state: directory
         mode: "0755"
 
-    - name: deploy portainer-agent compose file
-      template:
+    - name: Deploy portainer-agent compose file
+      ansible.builtin.template:
         src: templates/portainer-agent-compose.yml.j2
         dest: /opt/portainer-agent/docker-compose.yml
         mode: "0644"
 
-    - name: start portainer-agent
+    - name: Start portainer-agent
       community.docker.docker_compose_v2:
         project_src: /opt/portainer-agent
         state: present

@@ -1,44 +1,49 @@
 ---
-- name: deploy nas (nfs export + samba)
+- name: Deploy nas (nfs export + samba)
   hosts: nas
   become: true
 
   tasks:
-    - name: install nfs server
-      apt:
+    - name: Install nfs server
+      ansible.builtin.apt:
         name: nfs-kernel-server
         state: present
         update_cache: true
 
-    - name: configure NFS export
-      lineinfile:
+    - name: Configure NFS export
+      ansible.builtin.lineinfile:
         path: /etc/exports
-        line: "/mnt/nas 192.168.10.0/24(rw,sync,no_subtree_check,no_root_squash) 192.168.20.0/24(rw,sync,no_subtree_check,no_root_squash) 192.168.30.0/24(rw,sync,no_subtree_check,no_root_squash)"
+        line: >-
+          /mnt/nas
+          192.168.10.0/24(rw,sync,no_subtree_check,no_root_squash)
+          192.168.20.0/24(rw,sync,no_subtree_check,no_root_squash)
+          192.168.30.0/24(rw,sync,no_subtree_check,no_root_squash)
         create: true
+        mode: "0644"
 
-    - name: apply nfs exports
-      command: exportfs -ra
+    - name: Apply nfs exports
+      ansible.builtin.command: exportfs -ra
       changed_when: false
 
-    - name: ensure nfs server is enabled and running
-      systemd:
+    - name: Ensure nfs server is enabled and running
+      ansible.builtin.systemd:
         name: nfs-kernel-server
         enabled: true
         state: started
 
-    - name: create samba directory
-      file:
+    - name: Create samba directory
+      ansible.builtin.file:
         path: /opt/samba
         state: directory
         mode: "0755"
 
-    - name: deploy samba compose file
-      template:
+    - name: Deploy samba compose file
+      ansible.builtin.template:
         src: templates/nas-samba-compose.yml.j2
         dest: /opt/samba/docker-compose.yml
         mode: "0644"
 
-    - name: start samba
+    - name: Start samba
       community.docker.docker_compose_v2:
         project_src: /opt/samba
         state: present

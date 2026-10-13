@@ -1,19 +1,19 @@
 ---
-- name: check for available OS updates across the fleet
+- name: Check for available OS updates across the fleet
   hosts: prod:rpi
   become: true
 
   tasks:
-    - name: refresh apt cache
-      apt:
+    - name: Refresh apt cache
+      ansible.builtin.apt:
         update_cache: true
       changed_when: false
 
-    - name: list upgradable packages
-      command: apt list --upgradable
+    - name: List upgradable packages
+      ansible.builtin.command: apt list --upgradable
       register: upgradable
       changed_when: false
 
-    - name: report upgradable package count
-      debug:
+    - name: Report upgradable package count
+      ansible.builtin.debug:
         msg: "{{ inventory_hostname }}: {{ (upgradable.stdout_lines | length) - 1 }} package(s) upgradable"
