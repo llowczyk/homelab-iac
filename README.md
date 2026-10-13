@@ -26,7 +26,9 @@ Right now, this repository is both a working system and a learning project. Ever
 
 ## Hardware
 
-![Server rack](./other/serverrack.jpg)
+<p align="center">
+  <img src="./other/serverrack.jpg" alt="Server rack" width="600">
+</p>
 
 - **Rack**: A 10-inch modular server rack based on existing design created by [Mauricio Pessoa](https://www.printables.com/@Mauker) that I modified to my needs and 3d-printed myself.
 
@@ -139,11 +141,14 @@ Docker-based runner (on `homelab-devops`):
   Never runs automatically, gated behind a "Run workflow" button.
 - **`Terraform drift check`** -- scheduled twice a day, fails the build if
   real infrastructure has diverged from what is declared in code.
-- **`Ansible drift check`** -- same cadence, runs every playbook in
+- **`ansible drift check`** -- same cadence, runs every playbook in
   `--check` mode against the live fleet and fails when a drift is found.
 - **`OS update check`** -- scheduled once a day, checks every host in the
   lab for available OS package updates and reports
-  the count. Report-only, nothing gets installed automatically.
+  the count. Report-only, nothing gets installed automatically.i
+- **`terraform fmt`** -- fails if any `.tf` file is not canonically formatted.
+- **`terraform lint`** -- `terraform validate` plus tflint.
+- **`ansible lint`** -- yamllint and ansible-lint on the playbooks (many findings still open, cleanup is planned).
 
 At this point, no alerting is wired up. These checks are meant to be glanced at when convenient. I work in the field and I feel like setting up notifications can have negative effects on my `work-life balance`. 
 
@@ -181,7 +186,10 @@ It serves two things: an NFS export and Samba share for Windows access. This dis
 
 ```
 homelab-iac/
-├── terraform/              # one file per VM, shared tags/descriptions/variables
+├── terraform/
+│   ├── modules/vm/         #  VM definition every host is built from
+│   ├── vms.tf              # table of VMs (node, ID, VLAN, CPU, RAM, disk) and the module call
+│   └── tags.tf, descriptions.tf, variables.tf, versions.tf, outputs.tf
 ├── ansible/
 │   ├── inventory/           # prod.ini + group_vars (secrets, gitignored)
 │   └── playbooks/           # golden image + one deploy-*.yml per VM
@@ -193,6 +201,7 @@ homelab-iac/
 <details>
 <summary><strong>Design conventions used throughout the project</strong></summary>
 
+* Adding a VM is one line in the `vms` map in `terraform/vms.tf`; its IP is derived as `192.168.<vlan>.<id>`.
 * Shared values that repeat across every VM (gateway, DNS server, SSH
   key path, datastore, network bridge) live in `variables.tf`.
 * Terraform never manages a physical disk passthrough or USB device directly. 
