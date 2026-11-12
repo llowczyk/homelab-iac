@@ -1,0 +1,23 @@
+---
+- name: Deploy gameserver apps (Valheim dedicated server)
+  hosts: gameserver
+  become: true
+
+  tasks:
+    - name: Create valheim stack directory
+      ansible.builtin.file:
+        path: /opt/valheim
+        state: directory
+        mode: "0755"
+
+    # Holds SERVER_PASS from the vault, so not world-readable
+    - name: Deploy valheim compose file
+      ansible.builtin.template:
+        src: templates/gameserver-valheim-compose.yml.j2
+        dest: /opt/valheim/docker-compose.yml
+        mode: "0600"
+
+    - name: Start valheim stack
+      community.docker.docker_compose_v2:
+        project_src: /opt/valheim
+        state: present

@@ -70,6 +70,8 @@ jobs:
           check tools              playbooks/deploy-tools-apps.yml
           check rpi                playbooks/deploy-rpi-services.yml
           check jumpbox            playbooks/deploy-jumpbox.yml
+          check gameserver         playbooks/deploy-gameserver-apps.yml
+          check gameserver         playbooks/deploy-gameserver-apps.yml
 
           if [ "$drift" -ne 0 ]; then
             echo "::error::Ansible drift detected - see the groups above"
