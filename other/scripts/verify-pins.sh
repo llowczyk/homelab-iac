@@ -18,7 +18,7 @@ cd "$(git rev-parse --show-toplevel)"
 files=("$@")
 [ ${#files[@]} -eq 0 ] && mapfile -t files < <(ls ansible/playbooks/templates/*.j2 other/compose/*.y*ml 2>/dev/null)
 
-digest_of() { docker buildx imagetools inspect "$1" 2>/dev/null | awk '/^Digest:/{print $2; exit}'; }
+digest_of() { docker buildx imagetools inspect "$1" 2>/dev/null | awk '/^Digest:/ && d=="" {d=$2} END {print d}'; }
 
 out=$(mktemp); trap 'rm -f "$out"' EXIT
 for f in "${files[@]}"; do

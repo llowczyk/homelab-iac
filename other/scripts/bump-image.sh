@@ -29,7 +29,7 @@ if [ $# -eq 0 ] && [ "$(wc -l <<<"$current")" -gt 1 ]; then
   grep -nE "$pat" "${files[@]}" >&2; exit 1
 fi
 
-new=$(docker buildx imagetools inspect "$img:$tag" | awk '/^Digest:/{print $2; exit}')
+new=$(docker buildx imagetools inspect "$img:$tag" | awk '/^Digest:/ && d=="" {d=$2} END {print d}')
 [[ $new == sha256:* ]] || { echo "could not resolve $img:$tag" >&2; exit 1; }
 
 for f in "${files[@]}"; do
