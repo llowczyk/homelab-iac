@@ -64,15 +64,24 @@
     # --- promtail ---
     - name: Create promtail directory
       ansible.builtin.file: { path: /home/pi/docker-files/promtail, state: directory, mode: "0755" }
+      tags: promtail
     - name: Deploy promtail compose file
       ansible.builtin.template:
         src: templates/rpi-promtail-compose.yml.j2
         dest: /home/pi/docker-files/promtail/promtail-compose.yaml
         mode: "0644"
+      tags: promtail
     - name: Deploy promtail config
       ansible.builtin.template: { src: templates/promtail-config.yml.j2, dest: /home/pi/docker-files/promtail/promtail-config.yml, mode: "0644" }
+      register: promtail_config
+      tags: promtail
     - name: Start promtail
-      community.docker.docker_compose_v2: { project_src: /home/pi/docker-files/promtail, files: [promtail-compose.yaml], state: present }
+      community.docker.docker_compose_v2:
+        project_src: /home/pi/docker-files/promtail
+        files: [promtail-compose.yaml]
+        state: present
+        recreate: "{{ 'always' if promtail_config is changed else 'auto' }}"
+      tags: promtail
 
     # --- portainer agent ---
     - name: Create portainer-agent directory

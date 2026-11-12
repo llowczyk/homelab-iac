@@ -77,12 +77,12 @@ My homelab also runs small Windows Server environment (a domain controller and 2
  | Host | Role |
  |---|---|
  | `nas` | NFS export + Samba|
- | `monitor` | Zabbix stack (server, db, gui), Uptime Kuma |
+ | `monitor` | Zabbix stack (server, db, gui), Uptime Kuma, Loki |
  | `mediaserver` | Jellyfin, Jellyseerr, *arr stack |
  | `torrentbox` | Gluetun (WireGuard VPN) + Transmission |
  | `jumpbox` | Tailscale Subnet Router |
  | `proxy` | Nginx Proxy Manager |
- | `tools` | Portainer (gui), Grafana, Loki, Wiki.js, DBGate |
+ | `tools` | Portainer (gui), Grafana, Wiki.js, DBGate |
 
 Every one of these VMs is provisioned from a shared **golden image**, a
 cloud-init-enabled Ubuntu template that Terraform clones for each VM. Cloning
