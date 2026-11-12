@@ -1,6 +1,6 @@
 services:
   gitea:
-    image: gitea/gitea:1.26.2
+    image: gitea/gitea@sha256:8967bf9deaf3c5c4adae13519436dc1b20c646ac83fe37ae810c933a1045227d  # 28.3.0
     container_name: gitea
     restart: unless-stopped
     environment:
@@ -32,7 +32,7 @@ services:
       gitea-db:
         condition: service_healthy
   gitea-db:
-    image: postgres:16-alpine
+    image: postgres@sha256:cf78e76683b9ca8c5733cbbdce6c9262b45b6767934dd0a95e671f9a0fc20685  # 16.15-alpine
     container_name: gitea-db
     restart: unless-stopped
     environment:
@@ -49,7 +49,7 @@ services:
       timeout: 5s
       retries: 5
   act-runner:
-    image: gitea/act_runner:latest
+    image: gitea/act_runner@sha256:b5c35d6bdbb9bb25e531230bfc7cc663cb751406cbec90a2a891b85fea54de86  # 0.6.1
     container_name: act-runner
     restart: unless-stopped
     environment:

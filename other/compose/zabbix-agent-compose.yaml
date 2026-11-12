@@ -1,6 +1,6 @@
 services:
   zabbix-agent:
-    image: zabbix/zabbix-agent2:alpine-7.0-latest
+    image: zabbix/zabbix-agent2@sha256:aa8fa07dbd41e148b6156555bf10ba6d928efa40f9a4632d6787fb90d4756679  # alpine-7.0.32
     container_name: zabbix-agent
     privileged: true
     group_add:
@@ -15,6 +15,8 @@ services:
       - /sys:/host/sys:ro
     ports:
       - "10050:10050"
+    networks:
+      - infra
     restart: unless-stopped
 networks:
   infra:

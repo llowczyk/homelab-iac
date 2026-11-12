@@ -1,6 +1,6 @@
 services:
   proxmox-qdevice:
-    image: carolouellet/proxmox-qdevice:master
+    image: carolouellet/proxmox-qdevice@sha256:17033bc9a9c8b80d6b97bc04e944be27e6a7e144be724eb2d33102774788cfc1  # master
     platform: linux/arm64
     container_name: proxmox-qdevice
     hostname: ${HOSTNAME}

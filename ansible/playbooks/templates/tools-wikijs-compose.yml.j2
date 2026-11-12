@@ -1,6 +1,6 @@
 services:
   wikijs:
-    image: ghcr.io/requarks/wiki@sha256:1ad473cff124fa455e7aa43bbf7984c5b111a62a1317c664c4bf7a51343d6c91
+    image: ghcr.io/requarks/wiki@sha256:e4708eed80c014449c0c8426c8d466c7a52a62131555bb44372fa48378b448b8  # 2.5.317
     container_name: wikijs
     depends_on:
       - wikijs-db
@@ -17,7 +17,7 @@ services:
       - infra
     restart: unless-stopped
   wikijs-db:
-    image: postgres@sha256:b3968e348b48f1198cc6de6611d055dbad91cd561b7990c406c3fc28d7095b21
+    image: postgres@sha256:eab009ce9447a891d9482702d370bbf132c18563bb87cfdcc2b815c6d3b0372f  # 15.19-alpine
     container_name: wikijs-db
     environment:
       POSTGRES_USER: {{ wikijs_postgres_user }}
