@@ -134,17 +134,20 @@
         path: /opt/zabbix-agent
         state: directory
         mode: "0755"
+      when: "'monitoring' not in group_names"
 
     - name: Deploy zabbix-agent compose file
       ansible.builtin.template:
         src: templates/zabbix-agent-compose.yml.j2
         dest: /opt/zabbix-agent/docker-compose.yml
         mode: "0644"
-
+      when: "'monitoring' not in group_names"
+  
     - name: Start zabbix-agent
       community.docker.docker_compose_v2:
         project_src: /opt/zabbix-agent
         state: present
+      when: "'monitoring' not in group_names"
 
   handlers:
     - name: Reload nas automount
