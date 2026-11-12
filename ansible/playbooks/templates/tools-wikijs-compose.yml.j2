@@ -17,7 +17,7 @@ services:
       - infra
     restart: unless-stopped
   wikijs-db:
-    image: postgres@sha256:b3968e348b48f1198cc6de6611d055dbad91cd561b7990c406c3fc28d7095b21
+    image: postgres@sha256:eab009ce9447a891d9482702d370bbf132c18563bb87cfdcc2b815c6d3b0372f  # 15.19-alpine
     container_name: wikijs-db
     environment:
       POSTGRES_USER: {{ wikijs_postgres_user }}
