@@ -12,22 +12,28 @@ jobs:
       GITLEAKS_VERSION: "8.30.1"
       GITLEAKS_SHA256: "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb"
     steps:
+      # git must exist BEFORE checkout: without it actions/checkout falls back
+      # to a REST tarball download with no .git, and gitleaks has no history to scan.
+      - name: install git and pinned gitleaks
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq git wget ca-certificates
+          wget -q "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -O /tmp/gitleaks.tgz
+          echo "${GITLEAKS_SHA256}  /tmp/gitleaks.tgz" | sha256sum -c -
+          tar -xzf /tmp/gitleaks.tgz -C /usr/local/bin gitleaks
+          rm /tmp/gitleaks.tgz
+          git --version
+          gitleaks version
+
       - name: checkout (full history)
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: install pinned gitleaks
-        run: |
-          apt-get update -qq
-          apt-get install -y -qq wget
-          wget -q "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" -O gitleaks.tgz
-          echo "${GITLEAKS_SHA256}  gitleaks.tgz" | sha256sum -c -
-          tar -xzf gitleaks.tgz -C /usr/local/bin gitleaks
-          rm gitleaks.tgz
-          gitleaks version
-
       - name: scan full git history
         # .gitleaks.toml and .gitleaksignore in the repo root are picked up automatically.
         # --redact keeps secrets out of the job log.
-        run: gitleaks git --redact --verbose --no-banner .
+        run: |
+          git config --global --add safe.directory "$PWD"
+          echo "commits on this branch: $(git rev-list --count HEAD)"
+          gitleaks git --redact --verbose --no-banner .
