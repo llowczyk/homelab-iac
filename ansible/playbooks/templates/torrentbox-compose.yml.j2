@@ -26,7 +26,7 @@ services:
       retries: 3
       start_period: 60s
   transmission:
-    image: lscr.io/linuxserver/transmission@sha256:0913501f5d05c019f5e3555a3299df1d8de420fdf882c92a8857787f9fbf999d
+    image: lscr.io/linuxserver/transmission@sha256:aaf349cd859ca9d5f34f394c56b8097c267a513283698adc4d07ee61d7cb1a85  # 4.1.4-r0-ls369
     container_name: transmission
     network_mode: "service:gluetun"
     depends_on:
