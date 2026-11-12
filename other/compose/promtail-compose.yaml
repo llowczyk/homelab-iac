@@ -1,6 +1,6 @@
 services:
   promtail:
-    image: grafana/promtail:latest
+    image: grafana/promtail@sha256:a761cb834cfaeee29745440d4884d6748f0a08d8f68928db1d707018c1dcfbe9  # 3.6.11
     container_name: promtail
     group_add:
       - "988"

@@ -1,6 +1,6 @@
 services:
   portainer-agent:
-    image: portainer/agent:latest
+    image: portainer/agent@sha256:6e6d2d5d8967da5b4d45eab32b7268af170395395d753d3f34ecb4d6ca5bd388  # 2.45.3
     container_name: portainer-agent
     restart: unless-stopped
     ports:
