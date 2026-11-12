@@ -56,7 +56,7 @@ services:
       - zabbix-net
     restart: unless-stopped
   zabbix-agent:
-    image: zabbix/zabbix-agent2@sha256:1a6259be4c8da5267cdd25064d995a111e8c803df8b9c4072d10084f685ffab4
+    image: zabbix/zabbix-agent2@sha256:aa8fa07dbd41e148b6156555bf10ba6d928efa40f9a4632d6787fb90d4756679  # alpine-7.0.32
     container_name: zabbix-agent
     privileged: true
     group_add:
