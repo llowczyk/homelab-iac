@@ -109,3 +109,9 @@ variable "agent_enabled" {
   type        = bool
   description = "Enable the QEMU guest agent"
 }
+
+variable "started" {
+  type        = bool
+  description = "Keep the VM running and start it on host boot. false = VM is stopped but config and storage is kept."
+  default     = true
+}

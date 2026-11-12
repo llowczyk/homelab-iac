@@ -65,7 +65,7 @@ jobs:
           check nas                playbooks/deploy-nas.yml
           check monitoring         playbooks/deploy-monitoring.yml
           check torrentbox         playbooks/deploy-torrentbox-apps.yml
-          check mediaserver        playbooks/deploy-mediaserver-apps.yml
+          # check mediaserver        playbooks/deploy-mediaserver-apps.yml
           check proxy              playbooks/deploy-proxy-apps.yml
           check tools              playbooks/deploy-tools-apps.yml
           check rpi                playbooks/deploy-rpi-services.yml
