@@ -1,0 +1,39 @@
+# GENERATED FILE, do not edit by hand.
+# Source: local.vms in terraform/vms.tf. Regenerate with other/scripts/render-inventory.sh
+# Hand-written hosts and groups live in 20-static.yml.
+all:
+  children:
+    prod:
+      hosts:
+        gameserver:
+          ansible_host: 192.168.10.113
+          proxmox_node: pve01
+          proxmox_vmid: 113
+        jumpbox:
+          ansible_host: 192.168.10.108
+          proxmox_node: pve01
+          proxmox_vmid: 108
+        mediaserver:
+          ansible_host: 192.168.20.107
+          proxmox_node: pve02
+          proxmox_vmid: 107
+        monitor:
+          ansible_host: 192.168.10.104
+          proxmox_node: pve02
+          proxmox_vmid: 104
+        nas:
+          ansible_host: 192.168.20.102
+          proxmox_node: pve02
+          proxmox_vmid: 102
+        proxy:
+          ansible_host: 192.168.10.103
+          proxmox_node: pve01
+          proxmox_vmid: 103
+        tools:
+          ansible_host: 192.168.10.105
+          proxmox_node: pve01
+          proxmox_vmid: 105
+        torrentbox:
+          ansible_host: 192.168.30.106
+          proxmox_node: pve02
+          proxmox_vmid: 106

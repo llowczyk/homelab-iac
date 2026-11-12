@@ -1,0 +1,17 @@
+# Hand-written inventory: hosts that Terraform does not manage, and role groups.
+# Terraform-managed VMs (group "prod") come from 10-terraform.yml, which is generated.
+#
+# Do not add a group with the same name as a host. A playbook with
+# "hosts: proxy" already matches the host called proxy. Per-host vars go in
+# host_vars/<host>.yml.
+all:
+  children:
+    rpi:
+      hosts:
+        homelab-rpi:
+          ansible_host: 192.168.10.10
+
+    # Zabbix server stack. initial-setup-prod.yml skips the standalone agent here.
+    monitoring:
+      hosts:
+        monitor:

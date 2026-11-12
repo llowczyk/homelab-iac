@@ -5,3 +5,4 @@
 **/terraform.tfvars
 **/templates/zabbix-ssh-keys/id_zabbix
 .ansible/
+**/tfplan
