@@ -1,0 +1,3 @@
+# Accepted gitleaks findings, one fingerprint per line: <commit>:<file>:<rule-id>:<line>
+# Add a line only after the secret has been rotated (or confirmed a false positive).
+# Fingerprints contain no secret values, so this file is safe to sync to the public mirror.

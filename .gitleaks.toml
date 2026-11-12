@@ -1,0 +1,31 @@
+# gitleaks config for homelab-iac
+# Run locally:  gitleaks git --redact -v .          (full history of the current branch)
+#               gitleaks dir --redact -v .          (working tree only, incl. untracked files)
+title = "homelab-iac"
+
+# Start from the upstream default ruleset (~200 rules) and only add on top.
+[extend]
+useDefault = true
+
+# Proxmox API token, e.g. root@pam!terraform=1b2c3d4e-....  Not in the default set.
+[[rules]]
+id = "proxmox-api-token"
+description = "Proxmox VE API token (user@realm!tokenid=uuid)"
+regex = '''[A-Za-z0-9._-]+@(?:pam|pve)![A-Za-z0-9._-]+=([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})'''
+secretGroup = 1
+keywords = ["@pam!", "@pve!"]
+
+# A decrypted Ansible vault file committed by mistake: plain `vault_*: value` lines.
+# (Encrypted files start with $ANSIBLE_VAULT and never match.)
+[[rules]]
+id = "ansible-plaintext-vault-var"
+description = "Plaintext vault_* variable (vault file committed decrypted?)"
+regex = '''(?m)^\s*vault_[a-z0-9_]+:\s*["']?([^\s"'{][^\s"']{5,})'''
+secretGroup = 1
+keywords = ["vault_"]
+
+[allowlist]
+description = "Binary files"
+paths = [
+  '''(?i)\.(jpg|jpeg|png|gif|ico|pdf)$''',
+]
