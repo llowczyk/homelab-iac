@@ -1,5 +1,5 @@
 ---
-- name: Deploy monitoring stack (docker + zabbix + kuma)
+- name: Deploy monitoring stack (docker + zabbix + kuma + loki)
   hosts: monitoring
   become: true
 
@@ -139,14 +139,36 @@
         project_src: /opt/monitoring/kuma
         state: present
 
+    # --- loki (moved from tools 2026-11) ---
+    - name: Create loki directory
+      ansible.builtin.file: { path: /opt/monitoring/loki, state: directory, mode: "0755" }
+    - name: Deploy loki compose file
+      ansible.builtin.template: { src: templates/loki-compose.yml.j2, dest: /opt/monitoring/loki/docker-compose.yml, mode: "0644" }
+    - name: Deploy loki config
+      ansible.builtin.template: { src: templates/loki-config.yml.j2, dest: /opt/monitoring/loki/loki-config.yml, mode: "0644" }
+      register: loki_config
+    - name: Start loki
+      community.docker.docker_compose_v2:
+        project_src: /opt/monitoring/loki
+        state: present
+        recreate: "{{ 'always' if loki_config is changed else 'auto' }}"
+
     - name: Create promtail directory
       ansible.builtin.file: { path: /opt/promtail, state: directory, mode: "0755" }
+      tags: promtail
     - name: Deploy promtail compose file
       ansible.builtin.template: { src: templates/promtail-compose.yml.j2, dest: /opt/promtail/docker-compose.yml, mode: "0644" }
+      tags: promtail
     - name: Deploy promtail config
       ansible.builtin.template: { src: templates/promtail-config.yml.j2, dest: /opt/promtail/promtail-config.yml, mode: "0644" }
+      register: promtail_config
+      tags: promtail
     - name: Start promtail
-      community.docker.docker_compose_v2: { project_src: /opt/promtail, state: present }
+      community.docker.docker_compose_v2:
+        project_src: /opt/promtail
+        state: present
+        recreate: "{{ 'always' if promtail_config is changed else 'auto' }}"
+      tags: promtail
 
     - name: Create portainer-agent compose directory
       ansible.builtin.file:

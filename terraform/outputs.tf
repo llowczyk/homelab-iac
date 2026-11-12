@@ -4,6 +4,8 @@ output "vm_ips" {
 }
 
 output "ansible_inventory" {
-  description = "Ansible inventory for the Terraform-managed VMs, committed as ansible/inventory/10-terraform.yml"
-  value       = templatefile("${path.module}/templates/ansible-inventory.yml.tftpl", { vms = local.vms })
+  description = "Ansible inventory for the running Terraform-managed VMs (parked ones left out), committed as ansible/inventory/10-terraform.yml"
+  value = templatefile("${path.module}/templates/ansible-inventory.yml.tftpl", {
+    vms = { for name, vm in local.vms : name => vm if try(vm.started, true) }
+  })
 }

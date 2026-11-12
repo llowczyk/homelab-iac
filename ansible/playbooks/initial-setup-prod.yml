@@ -105,12 +105,20 @@
     # --- promtail ---
     - name: Create promtail directory
       ansible.builtin.file: { path: /opt/promtail, state: directory, mode: "0755" }
+      tags: promtail
     - name: Deploy promtail compose file
       ansible.builtin.template: { src: templates/promtail-compose.yml.j2, dest: /opt/promtail/docker-compose.yml, mode: "0644" }
+      tags: promtail
     - name: Deploy promtail config
       ansible.builtin.template: { src: templates/promtail-config.yml.j2, dest: /opt/promtail/promtail-config.yml, mode: "0644" }
+      register: promtail_config
+      tags: promtail
     - name: Start promtail
-      community.docker.docker_compose_v2: { project_src: /opt/promtail, state: present }
+      community.docker.docker_compose_v2:
+        project_src: /opt/promtail
+        state: present
+        recreate: "{{ 'always' if promtail_config is changed else 'auto' }}"
+      tags: promtail
 
     # --- diun ---
     - name: Create diun directory

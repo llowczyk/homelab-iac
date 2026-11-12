@@ -14,6 +14,10 @@ resource "proxmox_virtual_environment_vm" "this" {
   machine     = var.machine_type
   description = var.description
 
+  # false parks the VM: terraform shuts it down until "started" in vms.tf changes to true.
+  started = var.started
+  on_boot = var.started
+
   # Only present when the VM was created by cloning a template.
   dynamic "clone" {
     for_each = var.template_vm_id == null ? [] : [var.template_vm_id]

@@ -1,5 +1,5 @@
 ---
-- name: Deploy tools VM apps (Portainer, Grafana, Loki, DBGate)
+- name: Deploy tools VM apps (Portainer, Grafana, Wiki.js, DBGate)
   hosts: tools
   become: true
 
@@ -23,16 +23,6 @@
       ansible.builtin.template: { src: templates/tools-grafana-compose.yml.j2, dest: /opt/grafana/docker-compose.yml, mode: "0644" }
     - name: Start grafana
       community.docker.docker_compose_v2: { project_src: /opt/grafana, state: present }
-
-    # --- loki ---
-    - name: Create loki directory
-      ansible.builtin.file: { path: /opt/loki, state: directory, mode: "0755" }
-    - name: Deploy loki compose file
-      ansible.builtin.template: { src: templates/tools-loki-compose.yml.j2, dest: /opt/loki/docker-compose.yml, mode: "0644" }
-    - name: Deploy loki config
-      ansible.builtin.template: { src: templates/tools-loki-config.yml.j2, dest: /opt/loki/loki-config.yml, mode: "0644" }
-    - name: Start loki
-      community.docker.docker_compose_v2: { project_src: /opt/loki, state: present }
 
     # --- wikijs ---
     - name: Create wikijs directory

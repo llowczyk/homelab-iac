@@ -1,0 +1,33 @@
+services:
+  valheim:
+    image: ghcr.io/community-valheim-tools/valheim-server@sha256:f34d67ba8023e343b10ffda0144759a8c8d986f276510460315a01051bed8a6d  # 1.4.1
+    container_name: valheim
+    restart: unless-stopped
+    cap_add:
+      - SYS_NICE
+    stop_grace_period: 2m
+    deploy:
+      resources:
+        limits:
+          memory: 4g
+    ports:
+      - "2456-2457:2456-2457/udp"
+    environment:
+      SERVER_NAME: "Ragnarok triggering"
+      WORLD_NAME: "Dedicated"
+      SERVER_PASS: "{{ valheim_server_pass }}"  # min 5 chars, must not be contained in SERVER_NAME
+      SERVER_PUBLIC: "false"
+      SERVER_ARGS: "-crossplay -modifier combat easy -modifier deathpenalty casual -modifier raids much less -modifier portals casual"
+      TZ: "Europe/Warsaw"
+
+      # Weekly restart, Mondays 05:00 (join code changes after every restart)
+      RESTART_CRON: "0 5 * * 1"
+
+      # Backups every 6 hours, keep 3 days
+      BACKUPS: "true"
+      BACKUPS_CRON: "0 */6 * * *"
+      BACKUPS_MAX_AGE: "3"
+
+    volumes:
+      - ./config:/config
+      - ./data:/opt/valheim

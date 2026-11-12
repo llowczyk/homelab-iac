@@ -69,7 +69,9 @@ locals {
     gameserver = <<-EOT
       ## gameserver
 
-      - games
+      - valheim dedicated server
+      - managed via homelab-iac (Terraform + Ansible)
+      - playbook: deploy-gameserver-apps.yml
     EOT
   }
 }
