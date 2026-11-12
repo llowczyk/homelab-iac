@@ -142,7 +142,7 @@
         dest: /opt/zabbix-agent/docker-compose.yml
         mode: "0644"
       when: "'monitoring' not in group_names"
-  
+
     - name: Start zabbix-agent
       community.docker.docker_compose_v2:
         project_src: /opt/zabbix-agent
