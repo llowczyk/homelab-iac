@@ -1,0 +1,13 @@
+# GENERATED FILE, do not edit by hand.
+# Source: local.vms in terraform/vms.tf. Regenerate with other/scripts/render-inventory.sh
+# Hand-written hosts and groups live in 20-static.yml.
+all:
+  children:
+    prod:
+      hosts:
+%{ for name, vm in vms ~}
+        ${name}:
+          ansible_host: 192.168.${vm.vlan}.${vm.id}
+          proxmox_node: ${vm.node}
+          proxmox_vmid: ${vm.id}
+%{ endfor ~}

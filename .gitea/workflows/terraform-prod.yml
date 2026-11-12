@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - 'terraform/**'
+      - 'ansible/inventory/10-terraform.yml'
+      - 'other/scripts/render-inventory.sh'
 jobs:
   plan:
     runs-on: ubuntu-latest
@@ -35,7 +37,7 @@ jobs:
       - name: install terraform
         run: |
           apt-get update -qq
-          apt-get install -y -qq wget unzip openssh-client
+          apt-get install -y -qq wget unzip openssh-client jq
           wget -q https://releases.hashicorp.com/terraform/1.10.5/terraform_1.10.5_linux_amd64.zip
           unzip -o terraform_1.10.5_linux_amd64.zip
           mv terraform /usr/local/bin/
@@ -65,4 +67,15 @@ jobs:
           TF_VAR_vm_user_password: ${{ secrets.VM_USER_PASSWORD }}
           AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_SECRET_KEY }}
-        run: terraform plan
+        run: terraform plan -out=tfplan
+
+      - name: check generated ansible inventory is up to date
+        env:
+          TF_VAR_proxmox_endpoint: ${{ secrets.PROXMOX_ENDPOINT }}
+          TF_VAR_proxmox_api_token: ${{ secrets.PROXMOX_API_TOKEN }}
+          TF_VAR_vm_user_password: ${{ secrets.VM_USER_PASSWORD }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.MINIO_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+        run: |
+          ../other/scripts/render-inventory.sh --check tfplan
+          rm -f tfplan

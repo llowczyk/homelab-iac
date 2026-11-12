@@ -189,9 +189,10 @@ homelab-iac/
 ├── terraform/
 │   ├── modules/vm/         #  VM definition every host is built from
 │   ├── vms.tf              # table of VMs (node, ID, VLAN, CPU, RAM, disk) and the module call
+│   ├── templates/          # ansible-inventory.yml.tftpl (rendered by other/scripts/render-inventory.sh)
 │   └── tags.tf, descriptions.tf, variables.tf, versions.tf, outputs.tf
 ├── ansible/
-│   ├── inventory/           # prod.ini + group_vars (secrets, gitignored)
+│   ├── inventory/           # 10-terraform.yml (generated from vms.tf), 20-static.yml, group_vars/host_vars (vaulted)
 │   └── playbooks/           # golden image + one deploy-*.yml per VM
 │       └── templates/       # compose files, configs
 ├── .gitea/workflows/        # CI/CD pipeline definitions
