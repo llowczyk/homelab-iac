@@ -17,6 +17,9 @@ locals {
     mediaserver = { node = "pve02", id = 107, vlan = 20, cores = 2, memory = 6144, floating = 4096, disk = 20, clone = true, started = false }
     jumpbox     = { node = "pve01", id = 108, vlan = 10, cores = 2, memory = 2048, floating = 1024, disk = 15, clone = true }
     gameserver  = { node = "pve01", id = 113, vlan = 10, cores = 2, memory = 6144, floating = 4096, disk = 50, clone = true }
+
+    kube01       = { node = "pve01", id = 121, vlan = 10, cores = 2, memory = 4096, floating = 2048, disk = 15, clone = true }
+    kube02       = { node = "pve02", id = 122, vlan = 10, cores = 2, memory = 4096, floating = 2048, disk = 15, clone = true }
   }
 }
 

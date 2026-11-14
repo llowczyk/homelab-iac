@@ -15,3 +15,15 @@ all:
     monitoring:
       hosts:
         monitor:
+
+    # k3s cluster. baseline + k3s come from deploy-k3s.yml, not initial-setup-prod.yml.
+    k8s_server:
+      hosts:
+        kube01:
+    k8s_agent:
+      hosts:
+        kube02:
+    k8s:
+      children:
+        k8s_server:
+        k8s_agent:

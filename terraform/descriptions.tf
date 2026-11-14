@@ -73,5 +73,22 @@ locals {
       - managed via homelab-iac (Terraform + Ansible)
       - playbook: deploy-gameserver-apps.yml
     EOT
+
+    kube01 = <<-EOT
+      ## kube01
+
+      - k3s server (control plane, SQLite) + workloads
+      - managed via homelab-iac (terraform + ansible + flux)
+      - playbook: deploy-k3s.yml
+    EOT
+
+    kube02 = <<-EOT
+      ## kube02
+
+      - k3s agent (workloads)
+      - managed via homelab-iac (terraform + ansible + flux)
+      - playbook: deploy-k3s.yml
+    EOT
+
   }
 }
