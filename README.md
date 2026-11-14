@@ -99,7 +99,7 @@ Ansible then applies the same baseline (Docker, Zabbix agent, Portainer agent, P
 
 | Item | Why it's manual |
 |---|---|
-| `homelab-devops` | Runs everything related to repository -- Gitea, act runner and MinIO. Automating this VM seems like a chicken-and-egg problem.
+| `homelab-devops` | Runs everything related to repository -- Gitea, act runner and MinIO.
 | `homelab-pbs` (Proxmox Backup Server) | This is the backup system. A bit too consequential to risk at the moment. |
 | `Proxmox QDevice` | Cluster quorum pairing is a one-time operation |
 | `2TB NAS HDD` | Physical passthrough, moved between VMs manually via `qm set`. VM is templated, but the HDD attachment is not. |
@@ -148,7 +148,8 @@ Docker-based runner (on `homelab-devops`):
   the count. Report-only, nothing gets installed automatically.i
 - **`terraform fmt`** -- fails if any `.tf` file is not canonically formatted.
 - **`terraform lint`** -- `terraform validate` plus tflint.
-- **`ansible lint`** -- yamllint and ansible-lint on the playbooks (many findings still open, cleanup is planned).
+- **`ansible lint`** -- yamllint and ansible-lint on the playbooks (production profile, 0 findings).
+- **`gitleaks`** -- scans repository for committed secrets, API tokens and private keys, triggered on every push.
 
 At this point, no alerting is wired up. These checks are meant to be glanced at when convenient. I work in the field and I feel like setting up notifications can have negative effects on my `work-life balance`. 
 

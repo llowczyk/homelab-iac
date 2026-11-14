@@ -10,5 +10,7 @@ locals {
     nas         = sort(concat(local.common_tags, ["nfs", "samba"]))
     jumpbox     = sort(concat(local.common_tags, ["jumphost", "tailscale"]))
     gameserver  = sort(concat(local.common_tags, ["games"]))
+    kube01       = sort(concat(local.common_tags, ["kubernetes"]))
+    kube02       = sort(concat(local.common_tags, ["kubernetes"]))
   }
 }

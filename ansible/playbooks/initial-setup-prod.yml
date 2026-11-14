@@ -1,6 +1,6 @@
 ---
 - name: Initial VM setup — Docker, NAS mount, Portainer agent, Zabbix agent
-  hosts: prod
+  hosts: prod:!k8s
   become: true
 
   tasks:

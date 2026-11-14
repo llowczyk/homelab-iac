@@ -13,6 +13,14 @@ all:
           ansible_host: 192.168.10.108
           proxmox_node: pve01
           proxmox_vmid: 108
+        kube01:
+          ansible_host: 192.168.10.121
+          proxmox_node: pve01
+          proxmox_vmid: 121
+        kube02:
+          ansible_host: 192.168.10.122
+          proxmox_node: pve02
+          proxmox_vmid: 122
         monitor:
           ansible_host: 192.168.10.104
           proxmox_node: pve02
